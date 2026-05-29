@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Admin Login</h1>
+    <p>Login to manage product records.</p>
+</section>
+
+<section class="container">
+
+    <form method="POST" action="/admin/login" class="form-card small-form">
+
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
+
+        <label>Username</label>
+        <input type="text" name="username" required>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <button type="submit">Login</button>
+
+        <p class="hint">Test login: admin / admin123</p>
+
+    </form>
+
+</section>
+
+{% endblock %}

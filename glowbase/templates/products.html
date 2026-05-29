@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Product Listing</h1>
+    <p>Search and filter products by brand, category, rating, and price.</p>
+</section>
+
+<section class="container">
+
+    <form method="GET" action="/products" class="filter-box">
+        <input type="text" name="search" placeholder="Search product name..." value="{{ search }}">
+
+        <select name="brand">
+            <option value="">All Brands</option>
+            {% for brand in brands %}
+                <option value="{{ brand }}" {% if brand == selected_brand %}selected{% endif %}>
+                    {{ brand }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                    {{ category }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="rating">
+            <option value="">All Ratings</option>
+            <option value="4.5" {% if selected_rating == "4.5" %}selected{% endif %}>4.5 and above</option>
+            <option value="4.0" {% if selected_rating == "4.0" %}selected{% endif %}>4.0 and above</option>
+            <option value="3.5" {% if selected_rating == "3.5" %}selected{% endif %}>3.5 and above</option>
+        </select>
+
+        <select name="price">
+            <option value="">All Prices</option>
+            <option value="0-25" {% if selected_price == "0-25" %}selected{% endif %}>$0 - $25</option>
+            <option value="25-50" {% if selected_price == "25-50" %}selected{% endif %}>$25 - $50</option>
+            <option value="50-100" {% if selected_price == "50-100" %}selected{% endif %}>$50 - $100</option>
+            <option value="100-9999" {% if selected_price == "100-9999" %}selected{% endif %}>$100+</option>
+        </select>
+
+        <button type="submit">Filter</button>
+        <a href="/products" class="secondary-link">Reset</a>
+    </form>
+
+    <p class="result-count">Showing up to 100 products</p>
+
+    <div class="product-grid">
+        {% for product in products %}
+            <div class="product-card">
+                <h3>{{ product.product_name }}</h3>
+
+                <p><strong>Brand:</strong> {{ product.brand_name }}</p>
+                <p><strong>Category:</strong> {{ product.primary_category }}</p>
+                <p class="price">${{ product.price_usd }}</p>
+                <p><strong>Rating:</strong> {{ product.rating }}</p>
+                <p><strong>Reviews:</strong> {{ product.reviews }}</p>
+                <p><strong>Loves:</strong> {{ product.loves_count }}</p>
+
+                {% if product.out_of_stock == 1 or product.out_of_stock == "1" or product.out_of_stock == true %}
+                    <span class="badge danger">Out of Stock</span>
+                {% else %}
+                    <span class="badge">In Stock</span>
+                {% endif %}
+
+                <br><br>
+                <a href="/product/{{ product.product_id }}" class="btn">View Details</a>
+            </div>
+        {% else %}
+            <p>No products found.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+{% endblock %}

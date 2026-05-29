@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Product Reviews</h1>
+    <p>View customer review text, ratings, recommendation status, and profile details.</p>
+</section>
+
+<section class="container">
+
+    <form method="GET" action="/reviews" class="filter-box">
+        <input type="text" name="search" placeholder="Search product or review..." value="{{ search }}">
+
+        <select name="rating">
+            <option value="">All Ratings</option>
+            <option value="5" {% if selected_rating == "5" %}selected{% endif %}>5 Stars</option>
+            <option value="4" {% if selected_rating == "4" %}selected{% endif %}>4 Stars and above</option>
+            <option value="3" {% if selected_rating == "3" %}selected{% endif %}>3 Stars and above</option>
+        </select>
+
+        <select name="recommended">
+            <option value="">All Recommendations</option>
+            <option value="1" {% if selected_recommended == "1" %}selected{% endif %}>Recommended</option>
+            <option value="0" {% if selected_recommended == "0" %}selected{% endif %}>Not Recommended</option>
+        </select>
+
+        <button type="submit">Filter</button>
+        <a href="/reviews" class="secondary-link">Reset</a>
+    </form>
+
+    <p class="result-count">Showing up to 100 reviews</p>
+
+    <div class="review-list">
+        {% for review in reviews %}
+            <div class="review-card">
+                <h3>{{ review.review_title }}</h3>
+
+                <p class="review-meta">
+                    {{ review.product_name }} |
+                    {{ review.brand_name }} |
+                    Rating: {{ review.rating }}
+                </p>
+
+                <p>{{ review.review_text }}</p>
+
+                <p><strong>Recommended:</strong> {{ review.is_recommended }}</p>
+                <p><strong>Skin Type:</strong> {{ review.skin_type }}</p>
+                <p><strong>Skin Tone:</strong> {{ review.skin_tone }}</p>
+                <p><strong>Eye Color:</strong> {{ review.eye_color }}</p>
+                <p><strong>Hair Color:</strong> {{ review.hair_color }}</p>
+                <p><strong>Helpfulness:</strong> {{ review.helpfulness }}</p>
+            </div>
+        {% else %}
+            <p>No reviews found.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+{% endblock %}

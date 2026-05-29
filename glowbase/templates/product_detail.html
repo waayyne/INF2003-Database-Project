@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="container">
+
+    <div class="detail-card">
+        <h1>{{ product.product_name }}</h1>
+
+        <p><strong>Brand:</strong> {{ product.brand_name }}</p>
+        <p><strong>Primary Category:</strong> {{ product.primary_category }}</p>
+        <p><strong>Secondary Category:</strong> {{ product.secondary_category }}</p>
+        <p><strong>Tertiary Category:</strong> {{ product.tertiary_category }}</p>
+
+        <div class="detail-grid">
+            <div class="detail-box">
+                <h3>Price</h3>
+                <p>${{ product.price_usd }}</p>
+            </div>
+
+            <div class="detail-box">
+                <h3>Rating</h3>
+                <p>{{ product.rating }}</p>
+            </div>
+
+            <div class="detail-box">
+                <h3>Reviews</h3>
+                <p>{{ product.reviews }}</p>
+            </div>
+
+            <div class="detail-box">
+                <h3>Loves Count</h3>
+                <p>{{ product.loves_count }}</p>
+            </div>
+        </div>
+
+        <p><strong>Size:</strong> {{ product.size }}</p>
+        <p><strong>Variation:</strong> {{ product.variation_type }} {{ product.variation_value }}</p>
+        <p><strong>Limited Edition:</strong> {{ product.limited_edition }}</p>
+        <p><strong>New Product:</strong> {{ product.new }}</p>
+        <p><strong>Online Only:</strong> {{ product.online_only }}</p>
+        <p><strong>Sephora Exclusive:</strong> {{ product.sephora_exclusive }}</p>
+        <p><strong>Out of Stock:</strong> {{ product.out_of_stock }}</p>
+
+        <p><strong>Ingredients:</strong> {{ product.ingredients }}</p>
+        <p><strong>Highlights:</strong> {{ product.highlights }}</p>
+    </div>
+
+    <h2>Related Reviews</h2>
+
+    <div class="review-list">
+        {% for review in reviews %}
+            <div class="review-card">
+                <h3>{{ review.review_title }}</h3>
+
+                <p class="review-meta">
+                    Rating: {{ review.rating }} |
+                    Recommended: {{ review.is_recommended }}
+                </p>
+
+                <p>{{ review.review_text }}</p>
+
+                <p><strong>Skin Type:</strong> {{ review.skin_type }}</p>
+                <p><strong>Skin Tone:</strong> {{ review.skin_tone }}</p>
+                <p><strong>Helpfulness:</strong> {{ review.helpfulness }}</p>
+            </div>
+        {% else %}
+            <p>No reviews found for this product.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+{% endblock %}
