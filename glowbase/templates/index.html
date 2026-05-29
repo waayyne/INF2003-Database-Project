@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<header class="hero">
+    <div>
+        <h1>Beauty Product Analytics and Review System</h1>
+        <p>Explore Sephora beauty products, compare ratings, view reviews, and analyse brand performance.</p>
+        <a href="/products" class="btn">Explore Products</a>
+    </div>
+</header>
+
+<section class="container">
+    <h2>Project Overview</h2>
+    <p class="section-text">
+        GlowBase uses MariaDB for structured product data and MongoDB for flexible review data.
+        At this stage, CSV files are temporarily used for frontend testing.
+    </p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ total_products }}</h3>
+            <p>Total Products</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ total_brands }}</h3>
+            <p>Total Brands</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ total_reviews }}</h3>
+            <p>Total Reviews</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ top_category }}</h3>
+            <p>Top Category</p>
+        </div>
+    </div>
+</section>
+
+<section class="container">
+    <h2>Main Features</h2>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h3>Product Search</h3>
+            <p>Search products by name, brand, category, rating, and price.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Review Viewer</h3>
+            <p>View review title, text, rating, skin type, and recommendation status.</p>
+        </div>
+
+        <div class="feature-card">
+            <h3>Analytics Dashboard</h3>
+            <p>Analyse top brands, most-loved products, stock status, and review trends.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

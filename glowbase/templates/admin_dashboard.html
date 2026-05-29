@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Manage product records and review system data.</p>
+</section>
+
+<section class="container">
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ total_products }}</h3>
+            <p>Total Products</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ total_reviews }}</h3>
+            <p>Total Reviews</p>
+        </div>
+    </div>
+
+    <div class="admin-actions">
+        <a href="/admin/products" class="btn">Manage Products</a>
+        <a href="/admin/products/add" class="btn">Add Product</a>
+        <a href="/admin/logout" class="secondary-link">Logout</a>
+    </div>
+
+</section>
+
+{% endblock %}

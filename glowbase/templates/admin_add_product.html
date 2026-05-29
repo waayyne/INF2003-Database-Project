@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Add Product</h1>
+    <p>Add a new product record for testing SQL CRUD later.</p>
+</section>
+
+<section class="container">
+
+    <form method="POST" action="/admin/products/add" class="form-card">
+
+        <label>Product ID</label>
+        <input type="text" name="product_id" required>
+
+        <label>Product Name</label>
+        <input type="text" name="product_name" required>
+
+        <label>Brand Name</label>
+        <input type="text" name="brand_name" required>
+
+        <label>Primary Category</label>
+        <input type="text" name="primary_category" required>
+
+        <label>Secondary Category</label>
+        <input type="text" name="secondary_category">
+
+        <label>Tertiary Category</label>
+        <input type="text" name="tertiary_category">
+
+        <label>Price USD</label>
+        <input type="number" step="0.01" name="price_usd" required>
+
+        <label>Rating</label>
+        <input type="number" step="0.1" min="0" max="5" name="rating" required>
+
+        <label>Reviews Count</label>
+        <input type="number" name="reviews" value="0">
+
+        <label>Loves Count</label>
+        <input type="number" name="loves_count" value="0">
+
+        <label>Size</label>
+        <input type="text" name="size">
+
+        <label>Variation Type</label>
+        <input type="text" name="variation_type">
+
+        <label>Variation Value</label>
+        <input type="text" name="variation_value">
+
+        <label>Limited Edition</label>
+        <select name="limited_edition">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+
+        <label>New Product</label>
+        <select name="new">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+
+        <label>Online Only</label>
+        <select name="online_only">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+
+        <label>Out of Stock</label>
+        <select name="out_of_stock">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+
+        <label>Sephora Exclusive</label>
+        <select name="sephora_exclusive">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+
+        <label>Ingredients</label>
+        <textarea name="ingredients" rows="4"></textarea>
+
+        <label>Highlights</label>
+        <textarea name="highlights" rows="4"></textarea>
+
+        <button type="submit">Add Product</button>
+        <a href="/admin/products" class="secondary-link">Cancel</a>
+
+    </form>
+
+</section>
+
+{% endblock %}
