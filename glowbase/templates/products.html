@@ -31,10 +31,11 @@
         </select>
 
         <select name="rating">
-            <option value="">All Ratings</option>
-            <option value="4.5" {% if selected_rating == "4.5" %}selected{% endif %}>4.5 and above</option>
-            <option value="4.0" {% if selected_rating == "4.0" %}selected{% endif %}>4.0 and above</option>
-            <option value="3.5" {% if selected_rating == "3.5" %}selected{% endif %}>3.5 and above</option>
+        <option value="">All Ratings</option>
+        <option value="4.5-5" {% if selected_rating == "4.5-5" %}selected{% endif %}>4.5 - 5.0</option>
+        <option value="4.0-4.49" {% if selected_rating == "4.0-4.49" %}selected{% endif %}>4.0 - 4.49</option>
+        <option value="3.5-3.99" {% if selected_rating == "3.5-3.99" %}selected{% endif %}>3.5 - 3.99</option>
+        <option value="0-3.49" {% if selected_rating == "0-3.49" %}selected{% endif %}>Below 3.5</option>
         </select>
 
         <select name="price">

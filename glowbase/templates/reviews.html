@@ -14,9 +14,10 @@
 
         <select name="rating">
             <option value="">All Ratings</option>
-            <option value="5" {% if selected_rating == "5" %}selected{% endif %}>5 Stars</option>
-            <option value="4" {% if selected_rating == "4" %}selected{% endif %}>4 Stars and above</option>
-            <option value="3" {% if selected_rating == "3" %}selected{% endif %}>3 Stars and above</option>
+            <option value="5-5" {% if selected_rating == "5-5" %}selected{% endif %}>5 Stars</option>
+            <option value="4-4.99" {% if selected_rating == "4-4.99" %}selected{% endif %}>4 - 4.99 Stars</option>
+            <option value="3-3.99" {% if selected_rating == "3-3.99" %}selected{% endif %}>3 - 3.99 Stars</option>
+            <option value="0-2.99" {% if selected_rating == "0-2.99" %}selected{% endif %}>Below 3 Stars</option>
         </select>
 
         <select name="recommended">
