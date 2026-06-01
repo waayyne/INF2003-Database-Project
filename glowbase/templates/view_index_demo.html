@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>View and Index Demo</h1>
+    <p>Proof of SQL view and indexes used in the MariaDB database.</p>
+</section>
+
+<section class="container">
+
+    <div class="admin-actions">
+        <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
+        <a href="/admin/products" class="secondary-link">Back to Products</a>
+    </div>
+
+    <div class="dashboard-card">
+        <h2>SQL View: product_summary_view</h2>
+
+        <p>
+            This view combines product and brand information into one virtual table.
+            It makes repeated product queries easier to write.
+        </p>
+
+        <pre>
+CREATE VIEW product_summary_view AS
+SELECT
+    p.product_id,
+    p.product_name,
+    b.brand_name,
+    p.price_usd,
+    p.rating,
+    p.reviews,
+    p.loves_count,
+    p.out_of_stock
+FROM products p, brands b
+WHERE p.brand_id = b.brand_id;
+        </pre>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Price USD</th>
+                    <th>Rating</th>
+                    <th>Reviews</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for product in view_results %}
+                    <tr>
+                        <td>{{ product.product_id }}</td>
+                        <td>{{ product.product_name }}</td>
+                        <td>{{ product.brand_name }}</td>
+                        <td>${{ product.price_usd }}</td>
+                        <td>{{ product.rating }}</td>
+                        <td>{{ product.reviews }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">No view results found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+
+    <div class="dashboard-card">
+        <h2>SQL Indexes on Products Table</h2>
+
+        <p>
+            Indexes are created on frequently searched, filtered, and joined columns
+            to improve query performance.
+        </p>
+
+        <pre>
+CREATE INDEX idx_products_product_name ON products(product_name);
+CREATE INDEX idx_products_brand_id ON products(brand_id);
+CREATE INDEX idx_products_rating ON products(rating);
+CREATE INDEX idx_products_price ON products(price_usd);
+        </pre>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Table</th>
+                    <th>Index Name</th>
+                    <th>Column</th>
+                    <th>Non Unique</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for index in index_results %}
+                    <tr>
+                        <td>{{ index.Table }}</td>
+                        <td>{{ index.Key_name }}</td>
+                        <td>{{ index.Column_name }}</td>
+                        <td>{{ index.Non_unique }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4">No indexes found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Edit Product</h1>
+    <p>Update product details in MariaDB.</p>
+</section>
+
+<section class="container">
+
+    <form method="POST"
+          action="/admin/products/edit/{{ product.product_id }}"
+          class="form-card"
+          onsubmit="return confirm('Are you sure you want to update this product?');">
+
+        <label>Product ID</label>
+        <input type="text" value="{{ product.product_id }}" disabled>
+
+        <label>Product Name</label>
+        <input type="text" name="product_name" value="{{ product.product_name }}" required>
+
+        <label>Price USD</label>
+        <input type="number" step="0.01" name="price_usd" value="{{ product.price_usd }}" required>
+
+        <label>Rating</label>
+        <input type="number" step="0.1" min="0" max="5" name="rating" value="{{ product.rating }}">
+
+        <label>Size</label>
+        <input type="text" name="size" value="{{ product.size }}">
+
+        <label>Out of Stock</label>
+        <select name="out_of_stock">
+            <option value="0" {% if product.out_of_stock == 0 %}selected{% endif %}>No</option>
+            <option value="1" {% if product.out_of_stock == 1 %}selected{% endif %}>Yes</option>
+        </select>
+
+        <button type="submit">Update Product</button>
+        <a href="/admin/products" class="secondary-link">Cancel</a>
+
+    </form>
+
+</section>
+
+{% endblock %}

@@ -41,6 +41,31 @@ body {
     color: #ffb6d5;
 }
 
+.admin-bar {
+    background: #f6d7e6;
+    border-top: 1px solid #e2b7cb;
+    border-bottom: 1px solid #e2b7cb;
+    padding: 12px 60px;
+}
+
+.admin-bar ul {
+    display: flex;
+    list-style: none;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.admin-bar a {
+    color: #2b1b25;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 6px 0;
+}
+
+.admin-bar a:hover {
+    color: #c94f88;
+}
+
 .hero {
     min-height: 420px;
     background: linear-gradient(to right, #3a2232, #c05a8b);

@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Manage Reviews</h1>
+    <p>View, filter, update, and delete MongoDB review documents.</p>
+</section>
+
+<section class="container">
+
+    <div class="admin-actions">
+        <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
+    </div>
+
+    <form method="GET" action="/admin/reviews" class="filter-box">
+
+        <input type="text"
+               name="search"
+               placeholder="Search product, brand, title, or text"
+               value="{{ search }}">
+
+        <input type="text"
+               name="product_id"
+               placeholder="Product ID"
+               value="{{ selected_product_id }}">
+
+        <select name="brand_name">
+            <option value="" {% if selected_brand == "" %}selected{% endif %}>
+                All Brands
+            </option>
+
+            {% for brand in brands %}
+                <option value="{{ brand }}" {% if selected_brand == brand %}selected{% endif %}>
+                    {{ brand }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="rating">
+            <option value="" {% if selected_rating == "" %}selected{% endif %}>
+                All Ratings
+            </option>
+            <option value="5" {% if selected_rating == "5" %}selected{% endif %}>5 Stars</option>
+            <option value="4" {% if selected_rating == "4" %}selected{% endif %}>4 Stars</option>
+            <option value="3" {% if selected_rating == "3" %}selected{% endif %}>3 Stars</option>
+            <option value="2" {% if selected_rating == "2" %}selected{% endif %}>2 Stars</option>
+            <option value="1" {% if selected_rating == "1" %}selected{% endif %}>1 Star</option>
+        </select>
+
+        <select name="recommended">
+            <option value="" {% if selected_recommended == "" %}selected{% endif %}>
+                All Recommendations
+            </option>
+            <option value="1" {% if selected_recommended == "1" %}selected{% endif %}>
+                Recommended
+            </option>
+            <option value="0" {% if selected_recommended == "0" %}selected{% endif %}>
+                Not Recommended
+            </option>
+            <option value="null" {% if selected_recommended == "null" %}selected{% endif %}>
+                Unknown / Not Stated
+            </option>
+        </select>
+
+        <select name="limit">
+            <option value="50" {% if selected_limit == "50" %}selected{% endif %}>50 Reviews</option>
+            <option value="100" {% if selected_limit == "100" %}selected{% endif %}>100 Reviews</option>
+            <option value="200" {% if selected_limit == "200" %}selected{% endif %}>200 Reviews</option>
+            <option value="500" {% if selected_limit == "500" %}selected{% endif %}>500 Reviews</option>
+        </select>
+
+        <button type="submit">Filter Reviews</button>
+        <a href="/admin/reviews" class="secondary-link">Reset</a>
+
+    </form>
+
+    <p>
+        Showing {{ reviews|length }} review(s)
+        {% if total_matching_reviews is defined %}
+            out of {{ total_matching_reviews }} matching review(s).
+        {% endif %}
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Brand</th>
+                <th>Rating</th>
+                <th>Recommended</th>
+                <th>Review Title</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for review in reviews %}
+                <tr>
+                    <td>{{ review.product_name }}</td>
+                    <td>{{ review.brand_name }}</td>
+                    <td>{{ review.rating }}</td>
+
+                    <td>
+                        {% if review.is_recommended == 1 %}
+                            Yes
+                        {% elif review.is_recommended == 0 %}
+                            No
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if review.review_title %}
+                            {{ review.review_title }}
+                        {% else %}
+                            No title
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="/admin/reviews/edit/{{ review._id }}" class="btn">
+                            Edit
+                        </a>
+
+                        <a href="/admin/reviews/delete/{{ review._id }}"
+                           class="delete-link"
+                           onclick="return confirm('Are you sure you want to delete this review?');">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">No reviews found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</section>
+
+{% endblock %}

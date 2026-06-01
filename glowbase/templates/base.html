@@ -20,6 +20,21 @@
     </ul>
 </nav>
 
+{% if session.get("admin_logged_in") %}
+<nav class="admin-bar">
+    <ul>
+        <li><a href="/admin/dashboard">Admin Dashboard</a></li>
+        <li><a href="/admin/products">Manage Products</a></li>
+        <li><a href="/admin/products/add">Add Product</a></li>
+        <li><a href="/admin/reviews">Manage Reviews</a></li>
+        <li><a href="/admin/sql-demo">SQL Demo</a></li>
+        <li><a href="/admin/trigger-demo">Trigger Demo</a></li>
+        <li><a href="/admin/view-index-demo">View &amp; Index Demo</a></li>
+        <li><a href="/admin/logout">Logout</a></li>
+    </ul>
+</nav>
+{% endif %}
+
 {% block content %}{% endblock %}
 
 <footer>

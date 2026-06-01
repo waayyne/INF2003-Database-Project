@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Trigger Demo</h1>
+    <p>Proof that the MariaDB trigger runs automatically after product insert.</p>
+</section>
+
+<section class="container">
+
+    <div class="dashboard-card">
+        <h2>Trigger: after_product_insert</h2>
+
+        <p>
+            This trigger automatically inserts a log into product_add_logs
+            whenever a new product is added into the products table.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Product ID</th>
+                    <th>Product</th>
+                    <th>Action</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for log in trigger_logs %}
+                    <tr>
+                        <td>{{ log.log_id }}</td>
+                        <td>{{ log.product_id }}</td>
+                        <td>{{ log.product_name }}</td>
+                        <td>{{ log.action_type }}</td>
+                        <td>{{ log.created_at }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">No trigger logs yet. Add one product from admin first.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+{% endblock %}
