@@ -714,3 +714,21 @@ Report screenshots/evidence: still need to prepare
 ER diagram: still need to include in report
 GenAI reflection: still need to include in report
 ```
+
+
+
+
+To Do:
+3. product_categories table has no data
+In the SQL dump, the product_categories junction table is empty — INSERT block is blank. This means the many-to-many relationship between products and categories exists in schema but has no actual data showing it. This weakens your ER diagram story. You should either populate it or explain why in the report.
+4. Only one trigger
+You have after_product_insert but no trigger for UPDATE or DELETE. Not strictly required, but having only an INSERT trigger is minimal. Consider adding an after_product_delete trigger that also logs to product_add_logs with action_type 'DELETE' — it's a small addition that makes the feature much stronger.
+5. MongoDB CRUD is missing a dedicated NoSQL Update from the public side
+The only NoSQL update (update_one) is in the admin panel. That's fine, but worth noting — public users can only create (submit review) and read. Make sure your report highlights the admin-side update/delete for MongoDB.
+6. No performance analysis / query comparison
+The project description says this is optional but notes it can impress. The sql_demo page shows nested queries but doesn't quantify speed or compare query plans. Even one EXPLAIN output in the report comparing with/without indexes would be a nice touch for the 40% Database mark.
+7. Admin password is hardcoded in app.py
+admin123 is hardcoded. Mention in your report this is demo-only and that a real system would store hashed credentials in MariaDB.
+
+
+add in when user filter the query display the SQL Statement on the website as well.
