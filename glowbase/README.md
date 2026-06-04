@@ -19,13 +19,13 @@ Admin users can log in to manage product records, manage review documents, and d
 
 ## 2. Technology Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | Flask |
-| Frontend | HTML, CSS |
-| Relational database | MariaDB |
-| NoSQL database | MongoDB |
-| Environment config | python-dotenv |
+| Layer               | Technology    |
+| ------------------- | ------------- |
+| Backend             | Flask         |
+| Frontend            | HTML, CSS     |
+| Relational database | MariaDB       |
+| NoSQL database      | MongoDB       |
+| Environment config  | python-dotenv |
 
 ---
 
@@ -68,15 +68,15 @@ product_add_logs
 
 Table purpose:
 
-| Table | Purpose |
-|---|---|
-| products | Stores main product details |
-| brands | Stores brand names |
-| categories | Stores product category values |
-| product_categories | Links products to categories |
-| product_ingredients | Stores product ingredients |
-| product_highlights | Stores product highlights |
-| product_add_logs | Stores trigger audit logs for product actions |
+| Table               | Purpose                                       |
+| ------------------- | --------------------------------------------- |
+| products            | Stores main product details                   |
+| brands              | Stores brand names                            |
+| categories          | Stores product category values                |
+| product_categories  | Links products to categories                  |
+| product_ingredients | Stores product ingredients                    |
+| product_highlights  | Stores product highlights                     |
+| product_add_logs    | Stores trigger audit logs for product actions |
 
 ### 4.2 MongoDB
 
@@ -142,29 +142,29 @@ SQL view and index demo
 
 ## 6. Implemented Database Requirements
 
-| Requirement | Status | Where it is shown |
-|---|---:|---|
-| Web application | Done | Flask routes and HTML templates |
-| Relational database | Done | MariaDB |
-| NoSQL database | Done | MongoDB |
-| At least 3 SQL tables | Done | products, brands, categories, etc. |
-| SQL Create | Done | Admin Add Product |
-| SQL Read | Done | Products page, product details, analytics |
-| SQL Update | Done | Admin Edit Product |
-| SQL Delete | Done | Admin Delete Product |
-| NoSQL Create | Done | Submit Review |
-| NoSQL Read | Done | Reviews page and Admin Manage Reviews |
-| NoSQL Update | Done | Admin Edit Review |
-| NoSQL Delete | Done | Admin Delete Review |
-| Nested queries | Done | SQL Demo page |
-| SQL trigger | Done | Trigger Demo page and product_add_logs |
-| SQL view | Done | product_summary_view |
-| SQL indexes | Done | Product table indexes |
-| Search/filter | Done | Products page and Manage Reviews page |
-| Admin dashboard | Done | /admin/dashboard |
-| GenAI reflection | To include in report | Report section |
-| ER diagram | To include in report | Report section |
-| Screenshots/evidence | To prepare | Report appendix/evidence section |
+| Requirement           |               Status | Where it is shown                         |
+| --------------------- | -------------------: | ----------------------------------------- |
+| Web application       |                 Done | Flask routes and HTML templates           |
+| Relational database   |                 Done | MariaDB                                   |
+| NoSQL database        |                 Done | MongoDB                                   |
+| At least 3 SQL tables |                 Done | products, brands, categories, etc.        |
+| SQL Create            |                 Done | Admin Add Product                         |
+| SQL Read              |                 Done | Products page, product details, analytics |
+| SQL Update            |                 Done | Admin Edit Product                        |
+| SQL Delete            |                 Done | Admin Delete Product                      |
+| NoSQL Create          |                 Done | Submit Review                             |
+| NoSQL Read            |                 Done | Reviews page and Admin Manage Reviews     |
+| NoSQL Update          |                 Done | Admin Edit Review                         |
+| NoSQL Delete          |                 Done | Admin Delete Review                       |
+| Nested queries        |                 Done | SQL Demo page                             |
+| SQL trigger           |                 Done | Trigger Demo page and product_add_logs    |
+| SQL view              |                 Done | product_summary_view                      |
+| SQL indexes           |                 Done | Product table indexes                     |
+| Search/filter         |                 Done | Products page and Manage Reviews page     |
+| Admin dashboard       |                 Done | /admin/dashboard                          |
+| GenAI reflection      | To include in report | Report section                            |
+| ER diagram            | To include in report | Report section                            |
+| Screenshots/evidence  |           To prepare | Report appendix/evidence section          |
 
 ---
 
@@ -214,12 +214,12 @@ This login is for project demonstration only. A production version should store 
 
 ### 8.1 SQL CRUD
 
-| CRUD Operation | Feature |
-|---|---|
-| Create | Admin add product |
-| Read | Product listing, product details, analytics |
-| Update | Admin edit product |
-| Delete | Admin delete product |
+| CRUD Operation | Feature                                     |
+| -------------- | ------------------------------------------- |
+| Create         | Admin add product                           |
+| Read           | Product listing, product details, analytics |
+| Update         | Admin edit product                          |
+| Delete         | Admin delete product                        |
 
 Example SQL update used in the application:
 
@@ -235,12 +235,12 @@ WHERE product_id = %s;
 
 ### 8.2 NoSQL CRUD
 
-| CRUD Operation | Feature |
-|---|---|
-| Create | Submit review |
-| Read | Reviews page and Admin Manage Reviews |
-| Update | Admin edit review |
-| Delete | Admin delete review |
+| CRUD Operation | Feature                               |
+| -------------- | ------------------------------------- |
+| Create         | Submit review                         |
+| Read           | Reviews page and Admin Manage Reviews |
+| Update         | Admin edit review                     |
+| Delete         | Admin delete review                   |
 
 Example MongoDB update:
 
@@ -504,45 +504,26 @@ Do not push `.env` to GitHub.
 
 ## 12. Database Setup
 
-### 12.1 Create MariaDB database
+The app now supports automatic bootstrap on startup.
 
-Log in to MariaDB and run:
+When the Flask app starts, it will:
 
-```sql
-CREATE DATABASE glowbase;
+1. Create the MariaDB database if it does not exist.
+2. Import `data/glowbasev1.sql` automatically when the main `products` table is missing.
+3. Apply `data/sql_features_views_indexes.sql` automatically.
+4. Apply `data/sql_features_triggers.sql` automatically.
+5. Seed MongoDB `reviews` from `data/glowbase.reviews.json` when the collection is empty.
+
+You only need to ensure MariaDB and MongoDB services are running and `.env` values are correct.
+
+Optional environment variables:
+
+```env
+AUTO_BOOTSTRAP=true
+SEED_DATA_DIR=./data
 ```
 
-### 12.2 Import MariaDB schema/data
-
-From the project root:
-
-```bat
-"C:\Program Files\MariaDB 12.2\bin\mariadb.exe" -u root -p glowbase < glowbasev1.sql
-```
-
-### 12.3 Import MongoDB reviews
-
-Use MongoDB Compass or `mongoimport`.
-
-Example using `mongoimport`:
-
-```bash
-mongoimport --db glowbase --collection reviews --file glowbase.reviews.json --jsonArray
-```
-
-### 12.4 Add SQL trigger
-
-Run:
-
-```bat
-"C:\Program Files\MariaDB 12.2\bin\mariadb.exe" -u root -p glowbase < sql_features_triggers.sql
-```
-
-Check:
-
-```sql
-SHOW TRIGGERS;
-```
+Set `AUTO_BOOTSTRAP=false` to disable this behavior.
 
 ### 12.5 Add SQL view and indexes
 
@@ -590,6 +571,8 @@ Open Terminal in the project folder.
 Run:
 
 ```bash
+cd glowbase
+./venv/bin/python3 glowbase/app.py
 python3 app.py
 ```
 
@@ -692,9 +675,9 @@ Final implementation decisions, testing, screenshots, and explanations should be
 - Do not push .env to GitHub.
 - Do not push venv to GitHub.
 - If MongoDB reviews do not show, check that MongoDB is running.
-- If MariaDB pages fail, check that the glowbase database exists and the schema was imported.
+- If MariaDB pages fail, check that the MariaDB user in .env has CREATE/ALTER/INDEX/TRIGGER permissions.
 - If trigger demo is empty, add a product first.
-- If view/index demo fails, run sql_features_views_indexes.sql first.
+- If bootstrap is disabled, set AUTO_BOOTSTRAP=true or import SQL/JSON files manually.
 ```
 
 ---
