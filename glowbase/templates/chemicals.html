@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+    <h1>Chemical Ingredients</h1>
+    <p>Browse products by chemical ingredients found in customer reviews.</p>
+</section>
+
+<section class="container">
+    <div class="product-grid">
+        {% for chem in chemicals %}
+        <div class="product-card">
+            <h3>{{ chem._id }}</h3>
+            <p>Found in {{ chem.count }} products</p>
+            <a href="/chemicals/{{ chem._id|urlencode }}" class="btn">View Products</a>
+        </div>
+        {% else %}
+        <p>No chemicals found.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

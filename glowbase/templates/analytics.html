@@ -105,6 +105,83 @@
             </table>
         </div>
 
+        <!-- Add after brand_performance section -->
+        <div class="dashboard-card">
+            <h2>Top Chemicals in Product Reviews</h2>
+            <p>Most frequently mentioned chemical ingredients across all reviews.</p>
+        
+            <table>
+                <thead>
+                    <tr>
+                        <th>Chemical Name</th>
+                        <th>Products Containing</th>
+                        <th>Average Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chem in top_chemicals %}
+                    <tr>
+                        <td>
+                            <a href="/products?chemical={{ chem._id|urlencode }}">{{ chem._id }}</a>
+                        </td>
+                        <td>{{ chem.product_count }}</td>
+                        <td>{{ chem.avg_rating }} / 5.0</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3">No chemical data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="dashboard-card">
+                <h2>Rating Distribution</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rating</th>
+                            <th>Number of Reviews</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rating in rating_distribution %}
+                        <tr>
+                            <td>{{ rating.stars }} ★</td>
+                            <td>{{ rating.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        
+            <div class="dashboard-card">
+                <h2>Price Statistics</h2>
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>Average Price</th>
+                            <td>${{ "%.2f"|format(price_stats.avg_price) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Minimum Price</th>
+                            <td>${{ "%.2f"|format(price_stats.min_price) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Maximum Price</th>
+                            <td>${{ "%.2f"|format(price_stats.max_price) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Products</th>
+                            <td>{{ price_stats.total }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
 </section>

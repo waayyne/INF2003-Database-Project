@@ -51,6 +51,15 @@
                 <p><strong>Eye Color:</strong> {{ review.eye_color }}</p>
                 <p><strong>Hair Color:</strong> {{ review.hair_color }}</p>
                 <p><strong>Helpfulness:</strong> {{ review.helpfulness }}</p>
+
+                {% if review.chemicals %}
+                <p><strong>Chemicals:</strong>
+                    {% for chem in review.chemicals %}
+                    <a href="/chemicals/{{ chem|urlencode }}" class="badge">{{ chem }}</a>
+                    {% endfor %}
+                </p>
+                {% endif %}
+                
             </div>
         {% else %}
             <p>No reviews found.</p>

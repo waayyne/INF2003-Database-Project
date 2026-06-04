@@ -49,6 +49,18 @@
 
         <p><strong>Ingredients:</strong> {{ product.ingredients }}</p>
         <p><strong>Highlights:</strong> {{ product.highlights }}</p>
+        {% if product.chemicals %}
+        <div class="detail-card" style="margin-top: 20px;">
+            <h2>Chemical Ingredients</h2>
+            <div class="detail-grid">
+                {% for chemical in product.chemicals %}
+                <div class="detail-box">
+                    <h3>{{ chemical }}</h3>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <h2>Related Reviews</h2>

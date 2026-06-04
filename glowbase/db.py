@@ -2,7 +2,7 @@ import os
 import re
 from pathlib import Path
 import mysql.connector
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from bson import json_util
 from dotenv import load_dotenv
 
@@ -178,20 +178,31 @@ def _bootstrap_mariadb():
     )
     has_products_table = cursor.fetchone()[0] > 0
 
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_schema = %s
+        AND table_name = 'categories'
+        """,
+        (database_name,)
+    )
+    has_categories_table = cursor.fetchone()[0] > 0
+
     data_dir = _project_data_dir()
     main_sql_file = data_dir / "glowbasev1.sql"
     views_indexes_sql_file = data_dir / "sql_features_views_indexes.sql"
     triggers_sql_file = data_dir / "sql_features_triggers.sql"
     product_categories_sql_file = data_dir / "populate_product_categories.sql"
 
-    if product_categories_sql_file.exists():
-        print(f"Running product categories population: {product_categories_sql_file}")
-        _run_sql_file(cursor, product_categories_sql_file, database_name)
-        
-    if not has_products_table:
+    if not (has_products_table and has_categories_table):
         if not main_sql_file.exists():
             raise FileNotFoundError(f"Missing SQL file: {main_sql_file}")
         _run_sql_file(cursor, main_sql_file, database_name)
+
+    if product_categories_sql_file.exists():
+        print(f"Running product categories population: {product_categories_sql_file}")
+        _run_sql_file(cursor, product_categories_sql_file, database_name)
 
     if views_indexes_sql_file.exists():
         _run_sql_file(cursor, views_indexes_sql_file, database_name)
@@ -214,9 +225,9 @@ def _bootstrap_mongodb():
 
     client = MongoClient(mongo_uri)
     reviews_collection = client[mongo_database][reviews_collection_name]
+    reviews_file = _project_data_dir() / "glowbase.reviews.json"
 
     if reviews_collection.count_documents({}, limit=1) == 0:
-        reviews_file = _project_data_dir() / "glowbase.reviews.json"
         if reviews_file.exists():
             with open(reviews_file, "r", encoding="utf-8") as file:
                 payload = json_util.loads(file.read())
@@ -225,6 +236,29 @@ def _bootstrap_mongodb():
                 reviews_collection.insert_many(payload, ordered=False)
             elif isinstance(payload, dict):
                 reviews_collection.insert_one(payload)
+
+    if reviews_file.exists():
+        with open(reviews_file, "r", encoding="utf-8") as file:
+            payload = json_util.loads(file.read())
+
+        if isinstance(payload, list):
+            updates = []
+            for review in payload:
+                chemicals = review.get("chemicals")
+                review_id = review.get("_id")
+
+                if not review_id or not chemicals:
+                    continue
+
+                updates.append(
+                    UpdateOne(
+                        {"_id": review_id},
+                        {"$set": {"chemicals": chemicals}}
+                    )
+                )
+
+            if updates:
+                reviews_collection.bulk_write(updates, ordered=False)
 
     client.close()
 

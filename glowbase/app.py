@@ -260,13 +260,61 @@ def products():
     category = request.args.get("category", "")
     rating = request.args.get("rating", "")
     price = request.args.get("price", "")
+    chemical = request.args.get("chemical", "")  # NEW chemical filter
 
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
 
     params = []
+    
+    # If searching by chemical, first find matching product_ids from MongoDB
+    product_ids_filter = None
+    if chemical:
+        reviews_collection = get_mongo_collection()
+        # Find all reviews that contain this chemical in their chemicals array
+        matching_reviews = list(reviews_collection.find({"chemicals": chemical}))
+        # Extract unique product_ids (convert to string for consistency)
+        product_ids = list(set([str(r.get("product_id")) for r in matching_reviews if r.get("product_id")]))
+        
+        if product_ids:
+            product_ids_filter = product_ids
+        else:
+            # No products with this chemical, return empty result
+            cursor.close()
+            conn.close()
+            # Get filter options still
+            conn2 = get_mariadb_connection()
+            cursor2 = conn2.cursor(dictionary=True)
+            cursor2.execute("SELECT DISTINCT brand_name FROM brands ORDER BY brand_name")
+            brands = [row["brand_name"] for row in cursor2.fetchall()]
+            cursor2.execute("""
+                SELECT DISTINCT primary_category 
+                FROM categories 
+                WHERE primary_category IS NOT NULL 
+                ORDER BY primary_category
+            """)
+            categories = [row["primary_category"] for row in cursor2.fetchall()]
+            cursor2.close()
+            conn2.close()
+            
+            # Get chemicals for filter dropdown
+            chemicals = get_chemicals_list()
+            
+            return render_template(
+                "products.html",
+                products=[],
+                brands=brands,
+                categories=categories,
+                chemicals=chemicals,
+                search=search,
+                selected_brand=brand,
+                selected_category=category,
+                selected_rating=rating,
+                selected_price=price,
+                selected_chemical=chemical
+            )
 
-    # FIXED QUERY - includes categories from junction table
+    # Base query with categories aggregation
     query = """
         SELECT 
             p.product_id,
@@ -286,6 +334,12 @@ def products():
     """
 
     where_clauses = []
+    
+    # Apply product ID filter from chemical search
+    if product_ids_filter:
+        placeholders = ','.join(['%s'] * len(product_ids_filter))
+        where_clauses.append(f"p.product_id IN ({placeholders})")
+        params.extend(product_ids_filter)
     
     if search:
         where_clauses.append("p.product_name LIKE %s")
@@ -319,10 +373,6 @@ def products():
     cursor.execute(query, params)
     product_list = cursor.fetchall()
 
-    # Debug: Print first product to check if categories are fetched
-    if product_list:
-        print(f"DEBUG - First product categories: {product_list[0].get('categories', 'NOT FOUND')}")
-
     # Get distinct brands for filter
     cursor.execute("SELECT DISTINCT brand_name FROM brands ORDER BY brand_name")
     brands = [row["brand_name"] for row in cursor.fetchall()]
@@ -339,17 +389,80 @@ def products():
     cursor.close()
     conn.close()
 
+    # Get chemicals for filter dropdown
+    chemicals = get_chemicals_list()
+
     return render_template(
         "products.html",
         products=product_list,
         brands=brands,
         categories=categories,
+        chemicals=chemicals,
         search=search,
         selected_brand=brand,
         selected_category=category,
         selected_rating=rating,
-        selected_price=price
+        selected_price=price,
+        selected_chemical=chemical
     )
+
+
+def get_chemicals_list():
+    """Helper function to get list of chemicals from MongoDB reviews"""
+    reviews_collection = get_mongo_collection()
+    
+    # First, let's check what the data structure looks like
+    # Print a sample for debugging (will appear in console)
+    sample = reviews_collection.find_one({"chemicals": {"$exists": True, "$ne": []}})
+    if sample:
+        print(f"Sample chemicals structure: {sample.get('chemicals')}")
+        print(f"Type of chemicals: {type(sample.get('chemicals'))}")
+        if sample.get('chemicals') and len(sample.get('chemicals')) > 0:
+            print(f"First item type: {type(sample.get('chemicals')[0])}")
+    
+    # The chemicals might be stored in different ways:
+    # Option 1: Direct array of strings - {"chemicals": ["Titanium dioxide"]}
+    # Option 2: Array of objects with $oid - but that's for _id only
+    
+    # Try direct unwind first
+    pipeline = [
+        {"$match": {"chemicals": {"$exists": True, "$ne": []}}},
+        {"$unwind": "$chemicals"},
+        {"$group": {"_id": "$chemicals", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 30}
+    ]
+    
+    chemical_results = list(reviews_collection.aggregate(pipeline))
+    
+    # If no results, try extracting from nested structure
+    if not chemical_results:
+        print("No chemicals found with standard unwind, trying alternative method...")
+        # Get all reviews with chemicals
+        all_reviews = list(reviews_collection.find(
+            {"chemicals": {"$exists": True, "$ne": []}}
+        ).limit(100))
+        
+        chem_counts = {}
+        for review in all_reviews:
+            chems = review.get("chemicals", [])
+            for chem in chems:
+                # Convert to string if it's an object
+                if isinstance(chem, dict):
+                    chem_str = str(chem)  # This will show as {'$oid': '...'}
+                else:
+                    chem_str = str(chem)
+                chem_counts[chem_str] = chem_counts.get(chem_str, 0) + 1
+        
+        # Convert to list format
+        chemical_results = [{"_id": k, "count": v} for k, v in chem_counts.items()]
+        chemical_results.sort(key=lambda x: x["count"], reverse=True)
+        chemical_results = chemical_results[:30]
+    
+    result = [chem["_id"] for chem in chemical_results if chem["_id"]]
+    print(f"Found {len(result)} unique chemicals: {result[:5]}...")  # Debug print
+    
+    return result
 
 @app.route("/product/<product_id>")
 def product_detail(product_id):
@@ -359,13 +472,23 @@ def product_detail(product_id):
         return "Product not found."
 
     reviews = get_reviews_by_product_id(product_id)
+    
+    # Also get chemicals from reviews for this product
+    reviews_collection = get_mongo_collection()
+    # Get unique chemicals from reviews of this product
+    pipeline = [
+        {"$match": {"product_id": product_id, "chemicals": {"$exists": True, "$ne": []}}},
+        {"$unwind": "$chemicals"},
+        {"$group": {"_id": "$chemicals"}}
+    ]
+    chemical_results = list(reviews_collection.aggregate(pipeline))
+    product["chemicals"] = [chem["_id"] for chem in chemical_results]
 
     return render_template(
         "product_detail.html",
         product=product,
         reviews=reviews
     )
-
 
 @app.route("/reviews")
 def reviews():
@@ -488,6 +611,7 @@ def analytics():
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
 
+    # Basic product statistics
     cursor.execute("SELECT COUNT(*) AS total_products FROM products")
     total_products = cursor.fetchone()["total_products"]
 
@@ -502,6 +626,7 @@ def analytics():
     """)
     out_of_stock_count = cursor.fetchone()["out_of_stock_count"]
 
+    # Top rated products
     cursor.execute("""
         SELECT p.product_name, b.brand_name, p.rating
         FROM products p, brands b
@@ -512,6 +637,7 @@ def analytics():
     """)
     top_rated = cursor.fetchall()
 
+    # Most loved products
     cursor.execute("""
         SELECT p.product_name, b.brand_name, p.loves_count
         FROM products p, brands b
@@ -522,6 +648,7 @@ def analytics():
     """)
     most_loved = cursor.fetchall()
 
+    # Brand performance
     cursor.execute("""
         SELECT b.brand_name,
                COUNT(*) AS total_products,
@@ -541,8 +668,52 @@ def analytics():
     cursor.close()
     conn.close()
 
+    # MongoDB statistics
     reviews_collection = get_mongo_collection()
     recommended_count = reviews_collection.count_documents({"is_recommended": 1})
+    
+    # Chemical statistics from reviews
+    pipeline = [
+        {"$unwind": "$chemicals"},
+        {"$group": {
+            "_id": "$chemicals", 
+            "product_count": {"$sum": 1},
+            "avg_rating": {"$avg": "$rating"}
+        }},
+        {"$sort": {"product_count": -1}},
+        {"$limit": 15}
+    ]
+    
+    top_chemicals = list(reviews_collection.aggregate(pipeline))
+    
+    # Format chemical data for display
+    for chem in top_chemicals:
+        chem["avg_rating"] = round(chem["avg_rating"], 2) if chem["avg_rating"] else 0
+
+    # Rating distribution
+    rating_distribution = [
+        {"stars": 5, "count": reviews_collection.count_documents({"rating": 5})},
+        {"stars": 4, "count": reviews_collection.count_documents({"rating": 4})},
+        {"stars": 3, "count": reviews_collection.count_documents({"rating": 3})},
+        {"stars": 2, "count": reviews_collection.count_documents({"rating": 2})},
+        {"stars": 1, "count": reviews_collection.count_documents({"rating": 1})},
+    ]
+
+    # Price distribution statistics
+    conn = get_mariadb_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT 
+            COUNT(*) as total,
+            MIN(price_usd) as min_price,
+            MAX(price_usd) as max_price,
+            AVG(price_usd) as avg_price
+        FROM products
+        WHERE price_usd IS NOT NULL AND price_usd > 0
+    """)
+    price_stats = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
     return render_template(
         "analytics.html",
@@ -552,7 +723,10 @@ def analytics():
         recommended_count=recommended_count,
         top_rated=top_rated,
         most_loved=most_loved,
-        brand_performance=brand_performance
+        brand_performance=brand_performance,
+        top_chemicals=top_chemicals,
+        rating_distribution=rating_distribution,
+        price_stats=price_stats
     )
 
 
@@ -1439,6 +1613,54 @@ def performance_demo():
         join_explain=join_explain,
         indexes=indexes
     )
+
+@app.route("/chemicals")
+def chemicals():
+    reviews_collection = get_mongo_collection()
+    
+    # Get unique chemicals across all reviews
+    pipeline = [
+        {"$unwind": "$chemicals"},
+        {"$group": {"_id": "$chemicals", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 50}
+    ]
+    
+    chemical_stats = list(reviews_collection.aggregate(pipeline))
+    
+    return render_template("chemicals.html", chemicals=chemical_stats)
+
+@app.route("/chemicals/<chemical_name>")
+def chemical_products(chemical_name):
+    reviews_collection = get_mongo_collection()
+    
+    # Find all products containing this chemical
+    reviews = reviews_collection.find({"chemicals": chemical_name})
+    product_ids = list(set([r.get("product_id") for r in reviews]))
+    
+    # Get full product details from MariaDB
+    conn = get_mariadb_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    if product_ids:
+        placeholders = ','.join(['%s'] * len(product_ids))
+        cursor.execute(f"""
+            SELECT p.product_id, p.product_name, b.brand_name, p.price_usd, p.rating
+            FROM products p
+            JOIN brands b ON p.brand_id = b.brand_id
+            WHERE p.product_id IN ({placeholders})
+            ORDER BY p.product_name
+        """, product_ids)
+        products = cursor.fetchall()
+    else:
+        products = []
+    
+    cursor.close()
+    conn.close()
+    
+    return render_template("chemical_products.html", 
+                          chemical=chemical_name, 
+                          products=products)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
