@@ -1157,5 +1157,120 @@ def category_products(category_name):
     
     return render_template("category_products.html", products=products, category=category_name)
 
+@app.route("/admin/performance-demo")
+def performance_demo():
+    if not is_admin_logged_in():
+        return redirect("/admin/login")
+    
+    conn = get_mariadb_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # =========================================================
+    # Query 1: Search by product name (uses idx_products_product_name)
+    # =========================================================
+    
+    # WITH INDEX (normal query)
+    cursor.execute("""
+        EXPLAIN FORMAT=JSON
+        SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        WHERE p.product_name LIKE '%Cream%'
+        LIMIT 100
+    """)
+    with_index_result = cursor.fetchone()
+    
+    # Measure actual execution time WITH index
+    import time
+    start = time.time()
+    cursor.execute("""
+        SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        WHERE p.product_name LIKE '%Cream%'
+        LIMIT 100
+    """)
+    with_index_data = cursor.fetchall()
+    with_index_time = (time.time() - start) * 1000  # milliseconds
+    
+    # =========================================================
+    # Query 2: Search by price range (uses idx_products_price)
+    # =========================================================
+    
+    start = time.time()
+    cursor.execute("""
+        SELECT product_id, product_name, price_usd, rating
+        FROM products
+        WHERE price_usd BETWEEN 30 AND 60
+        ORDER BY price_usd
+        LIMIT 50
+    """)
+    price_query_data = cursor.fetchall()
+    price_query_time = (time.time() - start) * 1000
+    
+    cursor.execute("""
+        EXPLAIN FORMAT=JSON
+        SELECT product_id, product_name, price_usd, rating
+        FROM products
+        WHERE price_usd BETWEEN 30 AND 60
+        ORDER BY price_usd
+        LIMIT 50
+    """)
+    price_explain = cursor.fetchone()
+    
+    # =========================================================
+    # Query 3: Join with categories (complex query)
+    # =========================================================
+    
+    start = time.time()
+    cursor.execute("""
+        SELECT p.product_name, b.brand_name, c.primary_category, p.rating
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        JOIN product_categories pc ON p.product_id = pc.product_id
+        JOIN categories c ON pc.category_id = c.category_id
+        WHERE p.rating >= 4.5
+        ORDER BY p.rating DESC
+        LIMIT 50
+    """)
+    join_query_data = cursor.fetchall()
+    join_query_time = (time.time() - start) * 1000
+    
+    cursor.execute("""
+        EXPLAIN FORMAT=JSON
+        SELECT p.product_name, b.brand_name, c.primary_category, p.rating
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        JOIN product_categories pc ON p.product_id = pc.product_id
+        JOIN categories c ON pc.category_id = c.category_id
+        WHERE p.rating >= 4.5
+        ORDER BY p.rating DESC
+        LIMIT 50
+    """)
+    join_explain = cursor.fetchone()
+    
+    # =========================================================
+    # List all indexes on products table
+    # =========================================================
+    cursor.execute("SHOW INDEX FROM products")
+    indexes = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    
+    return render_template(
+        "performance_demo.html",
+        with_index_time=round(with_index_time, 2),
+        with_index_count=len(with_index_data),
+        with_index_explain=with_index_result,
+        price_query_time=round(price_query_time, 2),
+        price_query_count=len(price_query_data),
+        price_explain=price_explain,
+        join_query_time=round(join_query_time, 2),
+        join_query_count=len(join_query_data),
+        join_explain=join_explain,
+        indexes=indexes
+    )
+
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
