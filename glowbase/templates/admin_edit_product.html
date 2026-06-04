@@ -4,41 +4,236 @@
 
 <section class="page-header">
     <h1>Edit Product</h1>
-    <p>Update product details in MariaDB.</p>
+    <p>Update product details in MariaDB. Changes will be automatically logged by the UPDATE trigger.</p>
 </section>
 
 <section class="container">
 
-    <form method="POST"
-          action="/admin/products/edit/{{ product.product_id }}"
-          class="form-card"
-          onsubmit="return confirm('Are you sure you want to update this product?');">
+    <div class="admin-actions">
+        <a href="/admin/products" class="secondary-link">← Back to Products</a>
+        <a href="/admin/trigger-demo" class="secondary-link">View Audit Log</a>
+    </div>
 
-        <label>Product ID</label>
-        <input type="text" value="{{ product.product_id }}" disabled>
+    <form method="POST" action="/admin/products/edit/{{ product.product_id }}" class="form-card"
+        onsubmit="return confirm('Are you sure you want to update this product?\n\nThis change will be logged in the audit trail.');">
 
-        <label>Product Name</label>
+        <!-- Section 1: Basic Information -->
+        <h3 style="color: #2b1b25; margin-top: 0;">Basic Information</h3>
+
+        <label>Product ID (Read Only)</label>
+        <input type="text" value="{{ product.product_id }}" disabled style="background: #f0f0f0;">
+
+        <label>Product Name *</label>
         <input type="text" name="product_name" value="{{ product.product_name }}" required>
 
-        <label>Price USD</label>
-        <input type="number" step="0.01" name="price_usd" value="{{ product.price_usd }}" required>
+        <label>Brand (Read Only)</label>
+        <input type="text" value="{{ product.brand_name }}" disabled style="background: #f0f0f0;">
 
-        <label>Rating</label>
-        <input type="number" step="0.1" min="0" max="5" name="rating" value="{{ product.rating }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Price USD *</label>
+                <input type="number" step="0.01" name="price_usd" value="{{ product.price_usd }}" required>
+            </div>
+            <div>
+                <label>Rating (0-5)</label>
+                <input type="number" step="0.1" min="0" max="5" name="rating" value="{{ product.rating }}">
+            </div>
+        </div>
 
-        <label>Size</label>
-        <input type="text" name="size" value="{{ product.size }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Size</label>
+                <input type="text" name="size" value="{{ product.size or '' }}" placeholder="Example: 50ml / 1.7 oz">
+            </div>
+            <div>
+                <label>Out of Stock</label>
+                <select name="out_of_stock">
+                    <option value="0" {% if product.out_of_stock==0 %}selected{% endif %}>No (In Stock)</option>
+                    <option value="1" {% if product.out_of_stock==1 %}selected{% endif %}>Yes (Out of Stock)</option>
+                </select>
+            </div>
+        </div>
 
-        <label>Out of Stock</label>
-        <select name="out_of_stock">
-            <option value="0" {% if product.out_of_stock == 0 %}selected{% endif %}>No</option>
-            <option value="1" {% if product.out_of_stock == 1 %}selected{% endif %}>Yes</option>
-        </select>
+        <!-- Section 2: Engagement Metrics -->
+        <h3 style="color: #2b1b25; margin-top: 20px;">Engagement Metrics</h3>
 
-        <button type="submit">Update Product</button>
-        <a href="/admin/products" class="secondary-link">Cancel</a>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Loves Count</label>
+                <input type="number" name="loves_count" value="{{ product.loves_count or 0 }}">
+                <p class="hint">Number of "loves" from users</p>
+            </div>
+            <div>
+                <label>Reviews Count</label>
+                <input type="number" name="reviews" value="{{ product.reviews or 0 }}">
+                <p class="hint">Total number of reviews</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Pricing (Optional) -->
+        <h3 style="color: #2b1b25; margin-top: 20px;">Pricing Options</h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Value Price (Original Price)</label>
+                <input type="number" step="0.01" name="value_price_usd" value="{{ product.value_price_usd or '' }}"
+                    placeholder="Original price before discount">
+            </div>
+            <div>
+                <label>Sale Price (Discounted Price)</label>
+                <input type="number" step="0.01" name="sale_price_usd" value="{{ product.sale_price_usd or '' }}"
+                    placeholder="Discounted price">
+            </div>
+        </div>
+
+        <!-- Section 4: Product Flags -->
+        <h3 style="color: #2b1b25; margin-top: 20px;">Product Flags</h3>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+            <div>
+                <label>Limited Edition</label>
+                <select name="limited_edition">
+                    <option value="0" {% if product.limited_edition==0 %}selected{% endif %}>No</option>
+                    <option value="1" {% if product.limited_edition==1 %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+            <div>
+                <label>Is New</label>
+                <select name="is_new">
+                    <option value="0" {% if product.is_new==0 %}selected{% endif %}>No</option>
+                    <option value="1" {% if product.is_new==1 %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+            <div>
+                <label>Online Only</label>
+                <select name="online_only">
+                    <option value="0" {% if product.online_only==0 %}selected{% endif %}>No</option>
+                    <option value="1" {% if product.online_only==1 %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+            <div>
+                <label>Sephora Exclusive</label>
+                <select name="sephora_exclusive">
+                    <option value="0" {% if product.sephora_exclusive==0 %}selected{% endif %}>No</option>
+                    <option value="1" {% if product.sephora_exclusive==1 %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section 5: Variation Information -->
+        <h3 style="color: #2b1b25; margin-top: 20px;">Variation Information</h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Variation Type</label>
+                <input type="text" name="variation_type" value="{{ product.variation_type or '' }}"
+                    placeholder="Example: Size, Color, Scent">
+                <p class="hint">Type of variation (e.g., Size, Color, Scent)</p>
+            </div>
+            <div>
+                <label>Variation Value</label>
+                <input type="text" name="variation_value" value="{{ product.variation_value or '' }}"
+                    placeholder="Example: 50ml / 1.7 oz">
+                <p class="hint">Specific value for this variation</p>
+            </div>
+        </div>
+
+        <label>Variation Description</label>
+        <textarea name="variation_desc" rows="2"
+            placeholder="Additional details about the variation">{{ product.variation_desc or '' }}</textarea>
+
+        <!-- Section 6: Child Products (for sets/kits) -->
+        <h3 style="color: #2b1b25; margin-top: 20px;">Child Products (for Sets/Kits)</h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Child Count</label>
+                <input type="number" name="child_count" value="{{ product.child_count or 0 }}">
+                <p class="hint">Number of products in this set</p>
+            </div>
+            <div>
+                <label>Child Min Price</label>
+                <input type="number" step="0.01" name="child_min_price" value="{{ product.child_min_price or '' }}"
+                    placeholder="Minimum child product price">
+            </div>
+            <div>
+                <label>Child Max Price</label>
+                <input type="number" step="0.01" name="child_max_price" value="{{ product.child_max_price or '' }}"
+                    placeholder="Maximum child product price">
+            </div>
+        </div>
+
+        <!-- Section 7: Ingredients & Highlights -->
+        <h3 style="color: #2b1b25; margin-top: 20px;">Ingredients & Highlights</h3>
+
+        <label>Ingredients (JSON format recommended)</label>
+        <textarea name="ingredients" rows="4"
+            placeholder='["Water", "Glycerin", "Niacinamide"]'>{{ ingredients }}</textarea>
+        <p class="hint">Example: ["Water", "Glycerin", "Niacinamide", "Hyaluronic Acid"]</p>
+
+        <label>Highlights (JSON format recommended)</label>
+        <textarea name="highlights" rows="4"
+            placeholder='["Hydrating", "Clean at Sephora", "Cruelty-Free"]'>{{ highlights }}</textarea>
+        <p class="hint">Example: ["Hydrating", "Clean at Sephora", "Cruelty-Free", "Vegan"]</p>
+
+        <!-- Info Box about Triggers -->
+        <div style="background: #fff0f6; padding: 15px; border-radius: 8px; margin: 10px 0;">
+            <p style="margin: 0; color: #2b1b25;">
+                <strong>ℹ️ Trigger Information:</strong><br>
+                When you update this product, the <code>after_product_update</code> trigger will automatically:
+            </p>
+            <ul style="margin: 10px 0 0 20px; color: #2b1b25;">
+                <li>Compare old vs new values</li>
+                <li>Detect what changed (name, price, rating, stock, size, etc.)</li>
+                <li>Insert a log entry into <code>product_audit_logs</code></li>
+            </ul>
+            <p style="margin: 10px 0 0 0;">
+                <a href="/admin/trigger-demo" target="_blank">Click here to view the audit log →</a>
+            </p>
+        </div>
+
+        <!-- Form Buttons -->
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button type="submit">Update Product</button>
+            <a href="/admin/products" class="secondary-link">Cancel</a>
+        </div>
 
     </form>
+
+    <!-- Current Product Summary Card -->
+    <div class="dashboard-card" style="margin-top: 30px;">
+        <h3>Current Product Summary</h3>
+        <div class="detail-grid">
+            <div class="detail-box">
+                <strong>Product ID:</strong><br>
+                {{ product.product_id }}
+            </div>
+            <div class="detail-box">
+                <strong>Current Name:</strong><br>
+                {{ product.product_name }}
+            </div>
+            <div class="detail-box">
+                <strong>Current Price:</strong><br>
+                ${{ product.price_usd }}
+            </div>
+            <div class="detail-box">
+                <strong>Current Rating:</strong><br>
+                {{ product.rating }} / 5.0
+            </div>
+            <div class="detail-box">
+                <strong>Stock Status:</strong><br>
+                {% if product.out_of_stock == 1 %}
+                <span style="color: red;">Out of Stock</span>
+                {% else %}
+                <span style="color: green;">In Stock</span>
+                {% endif %}
+            </div>
+            <div class="detail-box">
+                <strong>Total Reviews:</strong><br>
+                {{ product.reviews or 0 }}
+            </div>
+        </div>
+    </div>
 
 </section>
 

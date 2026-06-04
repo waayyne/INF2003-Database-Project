@@ -743,6 +743,7 @@ def admin_add_product():
         return redirect("/admin/products")
 
     return render_template("admin_add_product.html")
+
 @app.route("/admin/products/edit/<product_id>", methods=["GET", "POST"])
 def admin_edit_product(product_id):
     if not is_admin_logged_in():
@@ -752,59 +753,217 @@ def admin_edit_product(product_id):
     cursor = conn.cursor(dictionary=True)
 
     if request.method == "POST":
-        product_name = request.form.get("product_name")
-        price_usd = request.form.get("price_usd") or 0
-        rating = request.form.get("rating") or 0
-        size = request.form.get("size") or ""
-        out_of_stock = request.form.get("out_of_stock") or 0
+        try:
+            # Get form data
+            product_name = request.form.get("product_name")
+            price_usd = request.form.get("price_usd") or 0
+            rating = request.form.get("rating") or 0
+            size = request.form.get("size") or ""
+            out_of_stock = request.form.get("out_of_stock") or 0
+            
+            # Optional fields that might be in the edit form
+            loves_count = request.form.get("loves_count") or 0
+            reviews = request.form.get("reviews") or 0
+            variation_type = request.form.get("variation_type") or ""
+            variation_value = request.form.get("variation_value") or ""
+            variation_desc = request.form.get("variation_desc") or ""
+            value_price_usd = request.form.get("value_price_usd") or None
+            sale_price_usd = request.form.get("sale_price_usd") or None
+            limited_edition = request.form.get("limited_edition") or 0
+            is_new = request.form.get("is_new") or 0
+            online_only = request.form.get("online_only") or 0
+            sephora_exclusive = request.form.get("sephora_exclusive") or 0
+            child_count = request.form.get("child_count") or 0
+            child_max_price = request.form.get("child_max_price") or None
+            child_min_price = request.form.get("child_min_price") or None
+            
+            # Convert empty strings to None for price fields
+            if value_price_usd == "":
+                value_price_usd = None
+            if sale_price_usd == "":
+                sale_price_usd = None
+            if child_max_price == "":
+                child_max_price = None
+            if child_min_price == "":
+                child_min_price = None
 
+            # Execute UPDATE - This triggers after_product_update automatically!
+            cursor.execute(
+                """
+                UPDATE products
+                SET product_name = %s,
+                    price_usd = %s,
+                    rating = %s,
+                    size = %s,
+                    out_of_stock = %s,
+                    loves_count = %s,
+                    reviews = %s,
+                    variation_type = %s,
+                    variation_value = %s,
+                    variation_desc = %s,
+                    value_price_usd = %s,
+                    sale_price_usd = %s,
+                    limited_edition = %s,
+                    is_new = %s,
+                    online_only = %s,
+                    sephora_exclusive = %s,
+                    child_count = %s,
+                    child_max_price = %s,
+                    child_min_price = %s
+                WHERE product_id = %s
+                """,
+                (
+                    product_name,
+                    price_usd,
+                    rating,
+                    size,
+                    out_of_stock,
+                    loves_count,
+                    reviews,
+                    variation_type,
+                    variation_value,
+                    variation_desc,
+                    value_price_usd,
+                    sale_price_usd,
+                    limited_edition,
+                    is_new,
+                    online_only,
+                    sephora_exclusive,
+                    child_count,
+                    child_max_price,
+                    child_min_price,
+                    product_id
+                )
+            )
+
+            conn.commit()
+            
+            # Also update ingredients if provided
+            ingredients = request.form.get("ingredients")
+            if ingredients:
+                # Check if ingredients record exists
+                cursor.execute(
+                    "SELECT COUNT(*) as count FROM product_ingredients WHERE product_id = %s",
+                    (product_id,)
+                )
+                result = cursor.fetchone()
+                
+                if result["count"] > 0:
+                    cursor.execute(
+                        "UPDATE product_ingredients SET ingredients = %s WHERE product_id = %s",
+                        (ingredients, product_id)
+                    )
+                else:
+                    cursor.execute(
+                        "INSERT INTO product_ingredients (product_id, ingredients) VALUES (%s, %s)",
+                        (product_id, ingredients)
+                    )
+            
+            # Also update highlights if provided
+            highlights = request.form.get("highlights")
+            if highlights:
+                # Check if highlights record exists
+                cursor.execute(
+                    "SELECT COUNT(*) as count FROM product_highlights WHERE product_id = %s",
+                    (product_id,)
+                )
+                result = cursor.fetchone()
+                
+                if result["count"] > 0:
+                    cursor.execute(
+                        "UPDATE product_highlights SET highlights = %s WHERE product_id = %s",
+                        (highlights, product_id)
+                    )
+                else:
+                    cursor.execute(
+                        "INSERT INTO product_highlights (product_id, highlights) VALUES (%s, %s)",
+                        (product_id, highlights)
+                    )
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+            return redirect("/admin/products")
+            
+        except Exception as e:
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            return f"Error updating product: {str(e)}", 500
+
+    # GET request - display edit form
+    try:
+        # Get main product information
         cursor.execute(
             """
-            UPDATE products
-            SET product_name = %s,
-                price_usd = %s,
-                rating = %s,
-                size = %s,
-                out_of_stock = %s
-            WHERE product_id = %s
+            SELECT 
+                p.product_id,
+                p.product_name,
+                p.brand_id,
+                b.brand_name,
+                p.loves_count,
+                p.rating,
+                p.reviews,
+                p.size,
+                p.variation_type,
+                p.variation_value,
+                p.variation_desc,
+                p.price_usd,
+                p.value_price_usd,
+                p.sale_price_usd,
+                p.limited_edition,
+                p.is_new,
+                p.online_only,
+                p.out_of_stock,
+                p.sephora_exclusive,
+                p.child_count,
+                p.child_max_price,
+                p.child_min_price
+            FROM products p
+            JOIN brands b ON p.brand_id = b.brand_id
+            WHERE p.product_id = %s
             """,
-            (
-                product_name,
-                price_usd,
-                rating,
-                size,
-                out_of_stock,
-                product_id
-            )
+            (product_id,)
         )
 
-        conn.commit()
+        product = cursor.fetchone()
+        
+        if not product:
+            cursor.close()
+            conn.close()
+            return "Product not found.", 404
+        
+        # Get product ingredients
+        cursor.execute(
+            "SELECT ingredients FROM product_ingredients WHERE product_id = %s",
+            (product_id,)
+        )
+        ingredient_row = cursor.fetchone()
+        ingredients = ingredient_row["ingredients"] if ingredient_row else ""
+        
+        # Get product highlights
+        cursor.execute(
+            "SELECT highlights FROM product_highlights WHERE product_id = %s",
+            (product_id,)
+        )
+        highlight_row = cursor.fetchone()
+        highlights = highlight_row["highlights"] if highlight_row else ""
+
         cursor.close()
         conn.close()
 
-        return redirect("/admin/products")
-
-    cursor.execute(
-        """
-        SELECT product_id, product_name, price_usd, rating, size, out_of_stock
-        FROM products
-        WHERE product_id = %s
-        """,
-        (product_id,)
-    )
-
-    product = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    if not product:
-        return "Product not found."
-
-    return render_template(
-        "admin_edit_product.html",
-        product=product
-    )
+        return render_template(
+            "admin_edit_product.html",
+            product=product,
+            ingredients=ingredients,
+            highlights=highlights
+        )
+        
+    except Exception as e:
+        cursor.close()
+        conn.close()
+        return f"Error loading product: {str(e)}", 500
 
 @app.route("/admin/products/delete/<product_id>")
 def admin_delete_product(product_id):
@@ -956,14 +1115,23 @@ def trigger_demo():
         ORDER BY log_id DESC
         LIMIT 20
     """)
-    trigger_logs = cursor.fetchall()
+    add_logs = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT log_id, product_id, product_name, action_type, changed_fields, created_at
+        FROM product_audit_logs
+        ORDER BY log_id DESC
+        LIMIT 20
+    """)
+    audit_logs = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
     return render_template(
         "trigger_demo.html",
-        trigger_logs=trigger_logs
+        add_logs=add_logs,
+        audit_logs=audit_logs
     )
 
 @app.route("/admin/reviews")

@@ -64,6 +64,7 @@ product_categories
 product_ingredients
 product_highlights
 product_add_logs
+product_audit_logs
 ```
 
 Table purpose:
@@ -76,7 +77,8 @@ Table purpose:
 | product_categories  | Links products to categories                  |
 | product_ingredients | Stores product ingredients                    |
 | product_highlights  | Stores product highlights                     |
-| product_add_logs    | Stores trigger audit logs for product actions |
+| product_add_logs    | Stores insert trigger logs                    |
+| product_audit_logs  | Stores trigger audit logs for product actions |
 
 ### 4.2 MongoDB
 
@@ -142,29 +144,29 @@ SQL view and index demo
 
 ## 6. Implemented Database Requirements
 
-| Requirement           |               Status | Where it is shown                         |
-| --------------------- | -------------------: | ----------------------------------------- |
-| Web application       |                 Done | Flask routes and HTML templates           |
-| Relational database   |                 Done | MariaDB                                   |
-| NoSQL database        |                 Done | MongoDB                                   |
-| At least 3 SQL tables |                 Done | products, brands, categories, etc.        |
-| SQL Create            |                 Done | Admin Add Product                         |
-| SQL Read              |                 Done | Products page, product details, analytics |
-| SQL Update            |                 Done | Admin Edit Product                        |
-| SQL Delete            |                 Done | Admin Delete Product                      |
-| NoSQL Create          |                 Done | Submit Review                             |
-| NoSQL Read            |                 Done | Reviews page and Admin Manage Reviews     |
-| NoSQL Update          |                 Done | Admin Edit Review                         |
-| NoSQL Delete          |                 Done | Admin Delete Review                       |
-| Nested queries        |                 Done | SQL Demo page                             |
-| SQL trigger           |                 Done | Trigger Demo page and product_add_logs    |
-| SQL view              |                 Done | product_summary_view                      |
-| SQL indexes           |                 Done | Product table indexes                     |
-| Search/filter         |                 Done | Products page and Manage Reviews page     |
-| Admin dashboard       |                 Done | /admin/dashboard                          |
-| GenAI reflection      | To include in report | Report section                            |
-| ER diagram            | To include in report | Report section                            |
-| Screenshots/evidence  |           To prepare | Report appendix/evidence section          |
+| Requirement           |               Status | Where it is shown                                           |
+| --------------------- | -------------------: | ----------------------------------------------------------- |
+| Web application       |                 Done | Flask routes and HTML templates                             |
+| Relational database   |                 Done | MariaDB                                                     |
+| NoSQL database        |                 Done | MongoDB                                                     |
+| At least 3 SQL tables |                 Done | products, brands, categories, etc.                          |
+| SQL Create            |                 Done | Admin Add Product                                           |
+| SQL Read              |                 Done | Products page, product details, analytics                   |
+| SQL Update            |                 Done | Admin Edit Product                                          |
+| SQL Delete            |                 Done | Admin Delete Product                                        |
+| NoSQL Create          |                 Done | Submit Review                                               |
+| NoSQL Read            |                 Done | Reviews page and Admin Manage Reviews                       |
+| NoSQL Update          |                 Done | Admin Edit Review                                           |
+| NoSQL Delete          |                 Done | Admin Delete Review                                         |
+| Nested queries        |                 Done | SQL Demo page                                               |
+| SQL trigger           |                 Done | Trigger Demo page and product_add_logs + product_audit_logs |
+| SQL view              |                 Done | product_summary_view                                        |
+| SQL indexes           |                 Done | Product table indexes                                       |
+| Search/filter         |                 Done | Products page and Manage Reviews page                       |
+| Admin dashboard       |                 Done | /admin/dashboard                                            |
+| GenAI reflection      | To include in report | Report section                                              |
+| ER diagram            | To include in report | Report section                                              |
+| Screenshots/evidence  |           To prepare | Report appendix/evidence section                            |
 
 ---
 
@@ -331,7 +333,7 @@ END;
 Purpose:
 
 ```text
-When an admin adds a new product, MariaDB automatically inserts an audit log into product_add_logs.
+When an admin adds a new product, MariaDB automatically inserts a log into product_add_logs.
 ```
 
 ### 8.5 SQL View
@@ -727,7 +729,7 @@ Add after_product_delete.
 Example purpose:
 
 ```text
-When an admin deletes a product, MariaDB automatically inserts a DELETE audit log into product_add_logs.
+When an admin deletes a product, MariaDB automatically inserts a DELETE audit log into product_audit_logs.
 ```
 
 This is not strictly required, but it makes the trigger feature stronger.
