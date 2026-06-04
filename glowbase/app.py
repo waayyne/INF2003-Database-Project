@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, session
 from datetime import datetime
-from db import get_mariadb_connection, get_mongo_collection
+from db import get_mariadb_connection, get_mongo_collection, bootstrap_databases
 from bson import ObjectId
 import re
 
 app = Flask(__name__)
 app.secret_key = "glowbase-secret-key"
+bootstrap_databases()
 
 
 # =========================================================
