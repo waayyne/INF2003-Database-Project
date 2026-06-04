@@ -87,6 +87,16 @@ def _execute_sql_statement(cursor, statement):
         raise
 
 
+def _drain_sql_results(cursor):
+    if not cursor.with_rows:
+        return
+
+    cursor.fetchall()
+    while cursor.nextset():
+        if cursor.with_rows:
+            cursor.fetchall()
+
+
 def _run_sql_file(cursor, sql_path, database_name):
     delimiter = ";"
     statement_lines = []
@@ -120,11 +130,13 @@ def _run_sql_file(cursor, sql_path, database_name):
             current_statement = _normalize_sql_for_compat(current_statement)
 
             _execute_sql_statement(cursor, current_statement)
+            _drain_sql_results(cursor)
 
     remaining = "".join(statement_lines).strip()
     if remaining:
         remaining = _normalize_sql_for_compat(remaining)
         _execute_sql_statement(cursor, remaining)
+        _drain_sql_results(cursor)
 
 
 def _bootstrap_mariadb():
@@ -170,7 +182,12 @@ def _bootstrap_mariadb():
     main_sql_file = data_dir / "glowbasev1.sql"
     views_indexes_sql_file = data_dir / "sql_features_views_indexes.sql"
     triggers_sql_file = data_dir / "sql_features_triggers.sql"
+    product_categories_sql_file = data_dir / "populate_product_categories.sql"
 
+    if product_categories_sql_file.exists():
+        print(f"Running product categories population: {product_categories_sql_file}")
+        _run_sql_file(cursor, product_categories_sql_file, database_name)
+        
     if not has_products_table:
         if not main_sql_file.exists():
             raise FileNotFoundError(f"Missing SQL file: {main_sql_file}")

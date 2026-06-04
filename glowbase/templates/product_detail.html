@@ -8,9 +8,19 @@
         <h1>{{ product.product_name }}</h1>
 
         <p><strong>Brand:</strong> {{ product.brand_name }}</p>
-        <p><strong>Primary Category:</strong> {{ product.primary_category }}</p>
-        <p><strong>Secondary Category:</strong> {{ product.secondary_category }}</p>
-        <p><strong>Tertiary Category:</strong> {{ product.tertiary_category }}</p>
+
+        <!-- Display multiple categories -->
+        <p><strong>Categories:</strong></p>
+        <ul>
+            {% for cat in product.categories %}
+            <li>{{ cat.primary_category }}
+                {% if cat.secondary_category %}→ {{ cat.secondary_category }}{% endif %}
+                {% if cat.tertiary_category %}→ {{ cat.tertiary_category }}{% endif %}
+            </li>
+            {% else %}
+            <li>No categories assigned</li>
+            {% endfor %}
+        </ul>
 
         <div class="detail-grid">
             <div class="detail-box">
@@ -35,11 +45,6 @@
         </div>
 
         <p><strong>Size:</strong> {{ product.size }}</p>
-        <p><strong>Variation:</strong> {{ product.variation_type }} {{ product.variation_value }}</p>
-        <p><strong>Limited Edition:</strong> {{ product.limited_edition }}</p>
-        <p><strong>New Product:</strong> {{ product.new }}</p>
-        <p><strong>Online Only:</strong> {{ product.online_only }}</p>
-        <p><strong>Sephora Exclusive:</strong> {{ product.sephora_exclusive }}</p>
         <p><strong>Out of Stock:</strong> {{ product.out_of_stock }}</p>
 
         <p><strong>Ingredients:</strong> {{ product.ingredients }}</p>
@@ -50,22 +55,13 @@
 
     <div class="review-list">
         {% for review in reviews %}
-            <div class="review-card">
-                <h3>{{ review.review_title }}</h3>
-
-                <p class="review-meta">
-                    Rating: {{ review.rating }} |
-                    Recommended: {{ review.is_recommended }}
-                </p>
-
-                <p>{{ review.review_text }}</p>
-
-                <p><strong>Skin Type:</strong> {{ review.skin_type }}</p>
-                <p><strong>Skin Tone:</strong> {{ review.skin_tone }}</p>
-                <p><strong>Helpfulness:</strong> {{ review.helpfulness }}</p>
-            </div>
+        <div class="review-card">
+            <h3>{{ review.review_title }}</h3>
+            <p class="review-meta">Rating: {{ review.rating }}</p>
+            <p>{{ review.review_text }}</p>
+        </div>
         {% else %}
-            <p>No reviews found for this product.</p>
+        <p>No reviews found for this product.</p>
         {% endfor %}
     </div>
 

@@ -181,13 +181,26 @@ def get_product_by_id(product_id):
     product = cursor.fetchone()
 
     if product:
-        product = add_display_fields(cursor, product)
+        # Get ALL categories for this product (many-to-many!)
+        cursor.execute("""
+            SELECT c.category_id, c.primary_category, c.secondary_category, c.tertiary_category
+            FROM product_categories pc
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE pc.product_id = %s
+        """, (product_id,))
+        
+        product_categories = cursor.fetchall()
+        product["categories"] = product_categories
+        
+        # Also get ingredients and highlights
+        ingredients, highlights = get_product_extra_text(cursor, product_id)
+        product["ingredients"] = ingredients
+        product["highlights"] = highlights
 
     cursor.close()
     conn.close()
 
     return product
-
 
 def get_reviews_by_product_id(product_id):
     reviews_collection = get_mongo_collection()
@@ -240,7 +253,6 @@ def index():
         top_category=top_category
     )
 
-
 @app.route("/products")
 def products():
     search = request.args.get("search", "")
@@ -254,82 +266,72 @@ def products():
 
     params = []
 
-    if category:
-        query = """
-            SELECT DISTINCT
-                p.product_id,
-                p.product_name,
-                p.brand_id,
-                b.brand_name,
-                p.loves_count,
-                p.rating,
-                p.reviews,
-                p.size,
-                p.price_usd,
-                p.out_of_stock
-            FROM products p, brands b, product_categories pc, categories c
-            WHERE p.brand_id = b.brand_id
-            AND p.product_id = pc.product_id
-            AND pc.category_id = c.category_id
-            AND c.primary_category = %s
-        """
-        params.append(category)
-    else:
-        query = """
-            SELECT
-                p.product_id,
-                p.product_name,
-                p.brand_id,
-                b.brand_name,
-                p.loves_count,
-                p.rating,
-                p.reviews,
-                p.size,
-                p.price_usd,
-                p.out_of_stock
-            FROM products p, brands b
-            WHERE p.brand_id = b.brand_id
-        """
+    # FIXED QUERY - includes categories from junction table
+    query = """
+        SELECT 
+            p.product_id,
+            p.product_name,
+            b.brand_name,
+            p.loves_count,
+            p.rating,
+            p.reviews,
+            p.size,
+            p.price_usd,
+            p.out_of_stock,
+            GROUP_CONCAT(DISTINCT c.primary_category SEPARATOR ', ') AS categories
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+        LEFT JOIN categories c ON pc.category_id = c.category_id
+    """
 
+    where_clauses = []
+    
     if search:
-        query += " AND p.product_name LIKE %s"
+        where_clauses.append("p.product_name LIKE %s")
         params.append("%" + search + "%")
 
     if brand:
-        query += " AND b.brand_name = %s"
+        where_clauses.append("b.brand_name = %s")
         params.append(brand)
 
     if rating:
         min_rating, max_rating = rating.split("-")
-        query += " AND p.rating >= %s AND p.rating <= %s"
+        where_clauses.append("p.rating >= %s AND p.rating <= %s")
         params.append(float(min_rating))
         params.append(float(max_rating))
+        
     if price:
         min_price, max_price = price.split("-")
-        query += " AND p.price_usd >= %s AND p.price_usd <= %s"
+        where_clauses.append("p.price_usd >= %s AND p.price_usd <= %s")
         params.append(float(min_price))
         params.append(float(max_price))
 
-    query += " ORDER BY p.product_name LIMIT 100"
+    if category:
+        where_clauses.append("c.primary_category = %s")
+        params.append(category)
+
+    if where_clauses:
+        query += " WHERE " + " AND ".join(where_clauses)
+
+    query += " GROUP BY p.product_id ORDER BY p.product_name LIMIT 100"
 
     cursor.execute(query, params)
     product_list = cursor.fetchall()
 
-    for product in product_list:
-        category_data = get_product_category(cursor, product["product_id"])
-        product["primary_category"] = category_data["primary_category"]
+    # Debug: Print first product to check if categories are fetched
+    if product_list:
+        print(f"DEBUG - First product categories: {product_list[0].get('categories', 'NOT FOUND')}")
 
-    cursor.execute("""
-        SELECT DISTINCT brand_name
-        FROM brands
-        ORDER BY brand_name
-    """)
+    # Get distinct brands for filter
+    cursor.execute("SELECT DISTINCT brand_name FROM brands ORDER BY brand_name")
     brands = [row["brand_name"] for row in cursor.fetchall()]
 
+    # Get distinct categories from categories table
     cursor.execute("""
-        SELECT DISTINCT primary_category
-        FROM categories
-        WHERE primary_category IS NOT NULL
+        SELECT DISTINCT primary_category 
+        FROM categories 
+        WHERE primary_category IS NOT NULL 
         ORDER BY primary_category
     """)
     categories = [row["primary_category"] for row in cursor.fetchall()]
@@ -348,7 +350,6 @@ def products():
         selected_rating=rating,
         selected_price=price
     )
-
 
 @app.route("/product/<product_id>")
 def product_detail(product_id):
@@ -1128,6 +1129,33 @@ def view_index_demo():
         index_results=index_results
     )
 
+@app.route("/category/<category_name>")
+def category_products(category_name):
+    conn = get_mariadb_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    cursor.execute("""
+        SELECT DISTINCT
+            p.product_id,
+            p.product_name,
+            b.brand_name,
+            p.price_usd,
+            p.rating,
+            p.out_of_stock
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        JOIN product_categories pc ON p.product_id = pc.product_id
+        JOIN categories c ON pc.category_id = c.category_id
+        WHERE c.primary_category = %s
+        ORDER BY p.rating DESC
+        LIMIT 50
+    """, (category_name,))
+    
+    products = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return render_template("category_products.html", products=products, category=category_name)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

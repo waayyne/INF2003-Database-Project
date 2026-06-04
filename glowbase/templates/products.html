@@ -54,27 +54,33 @@
 
     <div class="product-grid">
         {% for product in products %}
-            <div class="product-card">
-                <h3>{{ product.product_name }}</h3>
-
-                <p><strong>Brand:</strong> {{ product.brand_name }}</p>
-                <p><strong>Category:</strong> {{ product.primary_category }}</p>
-                <p class="price">${{ product.price_usd }}</p>
-                <p><strong>Rating:</strong> {{ product.rating }}</p>
-                <p><strong>Reviews:</strong> {{ product.reviews }}</p>
-                <p><strong>Loves:</strong> {{ product.loves_count }}</p>
-
-                {% if product.out_of_stock == 1 or product.out_of_stock == "1" or product.out_of_stock == true %}
-                    <span class="badge danger">Out of Stock</span>
-                {% else %}
-                    <span class="badge">In Stock</span>
-                {% endif %}
-
-                <br><br>
-                <a href="/product/{{ product.product_id }}" class="btn">View Details</a>
-            </div>
+        <div class="product-card">
+            <h3>{{ product.product_name }}</h3>
+            <p><strong>Brand:</strong> {{ product.brand_name }}</p>
+    
+            <!-- FIXED: Show categories -->
+            {% if product.categories %}
+            <p><strong>Category:</strong> {{ product.categories }}</p>
+            {% else %}
+            <p><strong>Category:</strong> <em>Not assigned</em></p>
+            {% endif %}
+    
+            <p class="price">${{ product.price_usd }}</p>
+            <p><strong>Rating:</strong> {{ product.rating }}</p>
+            <p><strong>Reviews:</strong> {{ product.reviews }}</p>
+            <p><strong>Loves:</strong> {{ product.loves_count }}</p>
+    
+            {% if product.out_of_stock == 1 %}
+            <span class="badge danger">Out of Stock</span>
+            {% else %}
+            <span class="badge">In Stock</span>
+            {% endif %}
+    
+            <br><br>
+            <a href="/product/{{ product.product_id }}" class="btn">View Details</a>
+        </div>
         {% else %}
-            <p>No products found.</p>
+        <p>No products found.</p>
         {% endfor %}
     </div>
 
