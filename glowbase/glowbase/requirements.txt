@@ -1,5 +1,0 @@
-flask
-mysql-connector-python
-pymongo
-python-dotenv
-pandas

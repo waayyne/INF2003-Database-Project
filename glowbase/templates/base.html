@@ -7,34 +7,38 @@
 </head>
 <body>
 
-<nav class="navbar">
+<nav class="navbar {% if session.get('admin_logged_in') %}navbar-admin-active{% endif %}">
     <div class="logo">GlowBase</div>
 
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/products">Products</a></li>
-        <li><a href="/reviews">Reviews</a></li>
-        <li><a href="/chemicals">Chemicals</a></li> <!-- NEW -->
-        <li><a href="/submit-review">Submit Review</a></li>
-        <li><a href="/analytics">Analytics</a></li>
-        <li><a href="/admin/login">Admin</a></li>
-    </ul>
-</nav>
+    <div class="nav-link-groups">
+        <ul class="main-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="/products">Products</a></li>
+            <li><a href="/reviews">Reviews</a></li>
+            <li><a href="/chemicals">Chemicals</a></li>
+            <li><a href="/submit-review">Submit Review</a></li>
+            <li><a href="/analytics">Analytics</a></li>
+            {% if session.get("admin_logged_in") %}
+            <li><a href="/admin/dashboard">Admin</a></li>
+            {% else %}
+            <li><a href="/admin/login">Admin</a></li>
+            {% endif %}
+        </ul>
 
-{% if session.get("admin_logged_in") %}
-<nav class="admin-bar">
-    <ul>
-        <li><a href="/admin/dashboard">Admin Dashboard</a></li>
-        <li><a href="/admin/products">Manage Products</a></li>
-        <li><a href="/admin/products/add">Add Product</a></li>
-        <li><a href="/admin/reviews">Manage Reviews</a></li>
-        <li><a href="/admin/sql-demo">SQL Demo</a></li>
-        <li><a href="/admin/trigger-demo">Trigger Demo</a></li>
-        <li><a href="/admin/view-index-demo">View &amp; Index Demo</a></li>
-        <li><a href="/admin/logout">Logout</a></li>
-    </ul>
+        {% if session.get("admin_logged_in") %}
+        <ul class="admin-nav-inline" aria-label="Admin navigation">
+            <li><a href="/admin/products">Manage Products</a></li>
+            <li><a href="/admin/products/add">Add Product</a></li>
+            <li><a href="/admin/reviews">Manage Reviews</a></li>
+            <li><a href="/admin/sql-demo">SQL Demo</a></li>
+            <li><a href="/admin/trigger-demo">Trigger Demo</a></li>
+            <li><a href="/admin/view-index-demo">View &amp; Index Demo</a></li>
+            <li><a href="/admin/performance-demo">Performance</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
+        </ul>
+        {% endif %}
+    </div>
 </nav>
-{% endif %}
 
 {% block content %}{% endblock %}
 

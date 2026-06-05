@@ -2,186 +2,226 @@
 
 {% block content %}
 
-<section class="page-header">
-    <h1>Analytics Dashboard</h1>
-    <p>View product and review analytics from the dataset.</p>
+{% set total_reviews_count = rating_distribution|sum(attribute='count') %}
+
+<section class="page-header analytics-page-header">
+    <div>
+        <h1>Analytics Dashboard</h1>
+        <p>View product and review analytics from the dataset.</p>
+    </div>
 </section>
 
-<section class="container">
+<section class="container analytics-container">
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ total_products }}</h3>
-            <p>Total Products</p>
+    <div class="analytics-kpi-grid">
+        <div class="analytics-kpi-card">
+            <div class="analytics-kpi-icon basket" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 9h12l-1 11H7L6 9z"></path>
+                    <path d="M9 9a3 3 0 0 1 6 0"></path>
+                </svg>
+            </div>
+            <div>
+                <p>Total Products</p>
+                <h2>{{ total_products }}</h2>
+                <span>MariaDB product records</span>
+            </div>
         </div>
 
-        <div class="stat-card">
-            <h3>{{ avg_rating }}</h3>
-            <p>Average Rating</p>
+        <div class="analytics-kpi-card">
+            <div class="analytics-kpi-icon star" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3z"></path>
+                </svg>
+            </div>
+            <div>
+                <p>Average Rating</p>
+                <h2>{{ avg_rating }}</h2>
+                <span>Across product table</span>
+            </div>
         </div>
 
-        <div class="stat-card">
-            <h3>{{ out_of_stock_count }}</h3>
-            <p>Out of Stock</p>
+        <div class="analytics-kpi-card">
+            <div class="analytics-kpi-icon stock" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 8l8-4 8 4-8 4-8-4z"></path>
+                    <path d="M4 8v8l8 4 8-4V8"></path>
+                    <path d="M12 12v8"></path>
+                </svg>
+            </div>
+            <div>
+                <p>Out of Stock</p>
+                <h2>{{ out_of_stock_count }}</h2>
+                <span>Unavailable products</span>
+            </div>
         </div>
 
-        <div class="stat-card">
-            <h3>{{ recommended_count }}</h3>
-            <p>Recommended Reviews</p>
+        <div class="analytics-kpi-card">
+            <div class="analytics-kpi-icon recommended" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M7 11v10H4V11h3z"></path>
+                    <path d="M7 11l5-8 1 1c.8.8 1 2 .5 3L12 10h6a2 2 0 0 1 2 2l-1 7a2 2 0 0 1-2 2H7V11z"></path>
+                </svg>
+            </div>
+            <div>
+                <p>Recommended Reviews</p>
+                <h2>{{ recommended_count }}</h2>
+                <span>MongoDB positive reviews</span>
+            </div>
         </div>
     </div>
 
-    <div class="dashboard-grid">
-
-        <div class="dashboard-card">
-            <h2>Top Rated Products</h2>
-
-            <table>
+    <div class="analytics-grid">
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Top Rated Products</h2>
+                <span>Top 10</span>
+            </div>
+            <table class="analytics-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Product</th>
                         <th>Brand</th>
                         <th>Rating</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    {% for product in top_rated %}
-                        <tr>
-                            <td>{{ product.product_name }}</td>
-                            <td>{{ product.brand_name }}</td>
-                            <td>{{ product.rating }}</td>
-                        </tr>
+                    {% for product in top_rated[:5] %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ product.product_name }}</td>
+                        <td>{{ product.brand_name }}</td>
+                        <td><strong>{{ product.rating }}</strong> <span class="mini-star">&#9733;</span></td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div class="dashboard-card">
-            <h2>Most Loved Products</h2>
-
-            <table>
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Most Loved Products</h2>
+                <span>Top 10</span>
+            </div>
+            <table class="analytics-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Product</th>
-                        <th>Brand</th>
+                        <th>Love Meter</th>
                         <th>Loves</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    {% for product in most_loved %}
-                        <tr>
-                            <td>{{ product.product_name }}</td>
-                            <td>{{ product.brand_name }}</td>
-                            <td>{{ product.loves_count }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="dashboard-card">
-            <h2>Brand Performance</h2>
-
-            <table>
-                <thead>
+                    {% set max_loves = most_loved[0].loves_count if most_loved else 1 %}
+                    {% for product in most_loved[:5] %}
                     <tr>
-                        <th>Brand</th>
-                        <th>Total Products</th>
-                        <th>Average Rating</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for brand in brand_performance %}
-                        <tr>
-                            <td>{{ brand.brand_name }}</td>
-                            <td>{{ brand.total_products }}</td>
-                            <td>{{ brand.avg_rating }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Add after brand_performance section -->
-        <div class="dashboard-card">
-            <h2>Top Chemicals in Product Reviews</h2>
-            <p>Most frequently mentioned chemical ingredients across all reviews.</p>
-        
-            <table>
-                <thead>
-                    <tr>
-                        <th>Chemical Name</th>
-                        <th>Products Containing</th>
-                        <th>Average Rating</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for chem in top_chemicals %}
-                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ product.product_name }}</td>
                         <td>
-                            <a href="/products?chemical={{ chem._id|urlencode }}">{{ chem._id }}</a>
+                            <div class="meter"><span style="width: {{ (product.loves_count / max_loves * 100)|round|int }}%"></span></div>
                         </td>
-                        <td>{{ chem.product_count }}</td>
-                        <td>{{ chem.avg_rating }} / 5.0</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3">No chemical data available.</td>
+                        <td>{{ product.loves_count }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        
-        <div class="dashboard-grid" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="dashboard-card">
-                <h2>Rating Distribution</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Rating</th>
-                            <th>Number of Reviews</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for rating in rating_distribution %}
-                        <tr>
-                            <td>{{ rating.stars }} ★</td>
-                            <td>{{ rating.count }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Brand Performance</h2>
+                <span>By average rating</span>
             </div>
-        
-            <div class="dashboard-card">
-                <h2>Price Statistics</h2>
-                <table>
-                    <tbody>
-                        <tr>
-                            <th>Average Price</th>
-                            <td>${{ "%.2f"|format(price_stats.avg_price) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Minimum Price</th>
-                            <td>${{ "%.2f"|format(price_stats.min_price) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Maximum Price</th>
-                            <td>${{ "%.2f"|format(price_stats.max_price) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Total Products</th>
-                            <td>{{ price_stats.total }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <table class="analytics-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Brand</th>
+                        <th>Avg Rating</th>
+                        <th>Products</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for brand in brand_performance[:5] %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ brand.brand_name }}</td>
+                        <td><strong>{{ brand.avg_rating }}</strong> <span class="mini-star">&#9733;</span></td>
+                        <td>{{ brand.total_products }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Top Chemicals in Product Reviews</h2>
+                <span>MongoDB mentions</span>
+            </div>
+            <div class="analytics-chemical-list">
+                {% for chem in top_chemicals[:12] %}
+                <a href="/products?chemical={{ chem._id|urlencode }}" class="analytics-chemical-row">
+                    <span>{{ chem._id }}</span>
+                    <strong>{{ chem.product_count }}</strong>
+                </a>
+                {% else %}
+                <p>No chemical data available.</p>
+                {% endfor %}
             </div>
         </div>
 
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Rating Distribution</h2>
+                <span>{{ total_reviews_count }} reviews</span>
+            </div>
+            <div class="rating-bars">
+                {% set max_rating_count = rating_distribution|max(attribute='count') %}
+                {% for rating in rating_distribution %}
+                <div class="rating-bar-row">
+                    <span>{{ rating.stars }} Stars</span>
+                    <div class="rating-bar">
+                        <span style="width: {{ (rating.count / max_rating_count.count * 100)|round|int if max_rating_count.count else 0 }}%"></span>
+                    </div>
+                    <strong>{{ rating.count }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Price Statistics</h2>
+                <span>MariaDB products</span>
+            </div>
+            <div class="price-stat-grid">
+                <div>
+                    <span>Min Price</span>
+                    <strong>${{ "%.2f"|format(price_stats.min_price) }}</strong>
+                </div>
+                <div>
+                    <span>Max Price</span>
+                    <strong>${{ "%.2f"|format(price_stats.max_price) }}</strong>
+                </div>
+                <div>
+                    <span>Avg Price</span>
+                    <strong>${{ "%.2f"|format(price_stats.avg_price) }}</strong>
+                </div>
+                <div>
+                    <span>Total Products</span>
+                    <strong>{{ price_stats.total }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="analytics-footer-note">
+        <span>Dataset: glowbase database</span>
+        <span>Total Reviews: {{ total_reviews_count }}</span>
+        <span class="system-ok">All systems operational</span>
     </div>
 
 </section>

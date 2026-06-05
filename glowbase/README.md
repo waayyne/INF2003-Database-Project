@@ -1,109 +1,423 @@
 # GlowBase
 
-GlowBase is a **Beauty Product Analytics and Review System** built for the INF2003 Database Systems group project. It demonstrates how a single web application can use both a relational database and a NoSQL database together as complementary backends.
+GlowBase is a **Beauty Product Analytics and Review System** developed for the **INF2003 Database Systems** group project.
 
----
+The project demonstrates how a single Flask web application can use both:
 
-## Table of Contents
-
-1. [Project Overview](#1-project-overview)
-2. [Technology Stack](#2-technology-stack)
-3. [Database Design](#3-database-design)
-4. [Project Structure](#4-project-structure)
-5. [Setup and Installation](#5-setup-and-installation)
-6. [Running the App](#6-running-the-app)
-7. [Website Routes](#7-website-routes)
-8. [Database Features](#8-database-features)
-9. [Admin Demo Pages](#9-admin-demo-pages)
-10. [Environment Variables](#10-environment-variables)
-11. [Team Notes](#11-team-notes)
+- **MariaDB** for structured relational product data
+- **MongoDB** for flexible product review documents
 
 ---
 
 ## 1. Project Overview
 
-GlowBase allows public users to browse and search beauty products, read and submit reviews, and view product analytics. Admin users can manage products and reviews, and demonstrate all database features through dedicated demo pages.
+GlowBase allows public users to browse beauty products, search and filter product data, view product details, read reviews, submit reviews, and view product analytics.
 
-**Database split:**
-
-| Database | Stores |
-|---|---|
-| MariaDB | Products, brands, categories, ingredients, highlights, audit logs |
-| MongoDB | Product reviews |
-
-This split was intentional. Product data is structured and relational — products belong to brands, belong to categories — so MariaDB fits naturally. Reviews are flexible documents where fields like skin type, skin tone, and chemicals are optional and vary per review, making MongoDB the better choice.
+Admin users can log in to manage product records, manage review documents, and demonstrate database features such as SQL CRUD, NoSQL CRUD, nested queries, triggers, views, and indexes.
 
 ---
 
 ## 2. Technology Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | Flask (Python) |
-| Frontend | HTML, CSS |
-| Relational database | MariaDB |
-| NoSQL database | MongoDB |
-| Environment config | python-dotenv |
+| Layer               | Technology    |
+| ------------------- | ------------- |
+| Backend             | Flask         |
+| Frontend            | HTML, CSS     |
+| Relational database | MariaDB       |
+| NoSQL database      | MongoDB       |
+| Environment config  | python-dotenv |
 
 ---
 
-## 3. Database Design
+## 3. Current System Status
 
-### 3.1 MariaDB Tables
+Current implementation:
 
-| Table | Purpose |
-|---|---|
-| `products` | Main product details (name, price, rating, stock status) |
-| `brands` | Brand names linked to products |
-| `categories` | Category values (primary, secondary, tertiary) |
-| `product_categories` | Junction table — links products to categories (many-to-many) |
-| `product_ingredients` | Ingredient lists per product |
-| `product_highlights` | Highlight tags per product |
-| `product_add_logs` | Trigger log for product inserts |
-| `product_audit_logs` | Trigger audit log for product updates and deletes |
-
-**Relationships:**
-- `products` → `brands` : many-to-one (each product has one brand)
-- `products` → `product_categories` → `categories` : many-to-many (a product can belong to multiple categories; a category can have multiple products)
-- `products` → `product_ingredients` : one-to-many
-- `products` → `product_highlights` : one-to-many
-
-### 3.2 MongoDB Collection
-
-Collection: `reviews`
-
-Example document fields:
-
-```
-product_id, product_name, brand_name, rating, is_recommended,
-review_title, review_text, skin_type, skin_tone, chemicals, submission_time
+```text
+Flask + MariaDB + MongoDB
 ```
 
-Fields like `skin_type`, `skin_tone`, and `chemicals` are optional and vary between reviews, which is why MongoDB's document model suits this data better than a rigid SQL table.
+Database split:
+
+```text
+MariaDB → Products, brands, categories, product ingredients, product highlights
+MongoDB → Product reviews
+```
+
+The old CSV/pandas version was only used during early frontend testing. The current application no longer depends on CSV files for the main website runtime.
 
 ---
 
-## 4. Project Structure
+## 4. Database Design
 
+### 4.1 MariaDB
+
+MariaDB stores structured product data because the product dataset has clear relationships between products, brands, categories, ingredients, and highlights.
+
+Main tables:
+
+```text
+products
+brands
+categories
+product_categories
+product_ingredients
+product_highlights
+product_add_logs
+product_audit_logs
 ```
+
+Table purpose:
+
+| Table               | Purpose                                       |
+| ------------------- | --------------------------------------------- |
+| products            | Stores main product details                   |
+| brands              | Stores brand names                            |
+| categories          | Stores product category values                |
+| product_categories  | Links products to categories                  |
+| product_ingredients | Stores product ingredients                    |
+| product_highlights  | Stores product highlights                     |
+| product_add_logs    | Stores insert trigger logs                    |
+| product_audit_logs  | Stores trigger audit logs for product actions |
+
+### 4.2 MongoDB
+
+MongoDB stores product reviews because reviews can contain flexible and optional fields.
+
+Collection:
+
+```text
+reviews
+```
+
+Example review fields:
+
+```text
+product_id
+product_name
+brand_name
+rating
+is_recommended
+review_title
+review_text
+skin_type
+skin_tone
+submission_time
+```
+
+---
+
+## 5. Main Features
+
+### 5.1 Public Features
+
+```text
+Home page
+Product listing
+Product search
+Product filtering by brand, category, rating, and price
+Product detail page
+Related product reviews
+Review listing
+Submit review form
+Analytics dashboard
+```
+
+### 5.2 Admin Features
+
+```text
+Admin login/logout
+Admin dashboard
+Add product
+Edit product
+Delete product with confirmation alert
+Manage reviews
+Filter reviews by search, product ID, brand, rating, recommendation, and limit
+Edit MongoDB review document
+Delete MongoDB review document with confirmation alert
+SQL nested query demo
+SQL trigger demo
+SQL view and index demo
+```
+
+---
+
+## 6. Implemented Database Requirements
+
+| Requirement           |               Status | Where it is shown                                           |
+| --------------------- | -------------------: | ----------------------------------------------------------- |
+| Web application       |                 Done | Flask routes and HTML templates                             |
+| Relational database   |                 Done | MariaDB                                                     |
+| NoSQL database        |                 Done | MongoDB                                                     |
+| At least 3 SQL tables |                 Done | products, brands, categories, etc.                          |
+| SQL Create            |                 Done | Admin Add Product                                           |
+| SQL Read              |                 Done | Products page, product details, analytics                   |
+| SQL Update            |                 Done | Admin Edit Product                                          |
+| SQL Delete            |                 Done | Admin Delete Product                                        |
+| NoSQL Create          |                 Done | Submit Review                                               |
+| NoSQL Read            |                 Done | Reviews page and Admin Manage Reviews                       |
+| NoSQL Update          |                 Done | Admin Edit Review                                           |
+| NoSQL Delete          |                 Done | Admin Delete Review                                         |
+| Nested queries        |                 Done | SQL Demo page                                               |
+| SQL trigger           |                 Done | Trigger Demo page and product_add_logs + product_audit_logs |
+| SQL view              |                 Done | product_summary_view                                        |
+| SQL indexes           |                 Done | Product table indexes                                       |
+| Search/filter         |                 Done | Products page and Manage Reviews page                       |
+| Admin dashboard       |                 Done | /admin/dashboard                                            |
+| GenAI reflection      | To include in report | Report section                                              |
+| ER diagram            | To include in report | Report section                                              |
+| Screenshots/evidence  |           To prepare | Report appendix/evidence section                            |
+
+---
+
+## 7. Website Routes
+
+### 7.1 Public Routes
+
+```text
+/
+/products
+/product/<product_id>
+/reviews
+/submit-review
+/analytics
+```
+
+### 7.2 Admin Routes
+
+```text
+/admin/login
+/admin/logout
+/admin/dashboard
+/admin/products
+/admin/products/add
+/admin/products/edit/<product_id>
+/admin/products/delete/<product_id>
+/admin/reviews
+/admin/reviews/edit/<review_id>
+/admin/reviews/delete/<review_id>
+/admin/sql-demo
+/admin/trigger-demo
+/admin/view-index-demo
+```
+
+Temporary admin login:
+
+```text
+Username: admin
+Password: admin123
+```
+
+This login is for project demonstration only. A production version should store admin users in the database and use password hashing.
+
+---
+
+## 8. Database Features
+
+### 8.1 SQL CRUD
+
+| CRUD Operation | Feature                                     |
+| -------------- | ------------------------------------------- |
+| Create         | Admin add product                           |
+| Read           | Product listing, product details, analytics |
+| Update         | Admin edit product                          |
+| Delete         | Admin delete product                        |
+
+Example SQL update used in the application:
+
+```sql
+UPDATE products
+SET product_name = %s,
+    price_usd = %s,
+    rating = %s,
+    size = %s,
+    out_of_stock = %s
+WHERE product_id = %s;
+```
+
+### 8.2 NoSQL CRUD
+
+| CRUD Operation | Feature                               |
+| -------------- | ------------------------------------- |
+| Create         | Submit review                         |
+| Read           | Reviews page and Admin Manage Reviews |
+| Update         | Admin edit review                     |
+| Delete         | Admin delete review                   |
+
+Example MongoDB update:
+
+```python
+reviews_collection.update_one(
+    {"_id": ObjectId(review_id)},
+    {"$set": {
+        "rating": int(rating),
+        "is_recommended": int(is_recommended),
+        "review_title": review_title,
+        "review_text": review_text
+    }}
+)
+```
+
+Example MongoDB delete:
+
+```python
+reviews_collection.delete_one({"_id": ObjectId(review_id)})
+```
+
+### 8.3 Nested Queries
+
+Nested queries are shown at:
+
+```text
+/admin/sql-demo
+```
+
+Example 1: Products with rating higher than the average rating.
+
+```sql
+SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+FROM products p, brands b
+WHERE p.brand_id = b.brand_id
+AND p.rating > (
+    SELECT AVG(rating)
+    FROM products
+)
+ORDER BY p.rating DESC
+LIMIT 20;
+```
+
+Example 2: Products from brands with more than 3 products.
+
+```sql
+SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+FROM products p, brands b
+WHERE p.brand_id = b.brand_id
+AND p.brand_id IN (
+    SELECT brand_id
+    FROM products
+    GROUP BY brand_id
+    HAVING COUNT(*) > 3
+)
+ORDER BY b.brand_name, p.product_name
+LIMIT 20;
+```
+
+### 8.4 SQL Trigger
+
+Trigger demo is shown at:
+
+```text
+/admin/trigger-demo
+```
+
+Trigger used:
+
+```sql
+CREATE TRIGGER after_product_insert
+AFTER INSERT ON products
+FOR EACH ROW
+BEGIN
+    INSERT INTO product_add_logs (
+        product_id,
+        product_name,
+        action_type
+    )
+    VALUES (
+        NEW.product_id,
+        NEW.product_name,
+        'INSERT'
+    );
+END;
+```
+
+Purpose:
+
+```text
+When an admin adds a new product, MariaDB automatically inserts a log into product_add_logs.
+```
+
+### 8.5 SQL View
+
+View and index demo is shown at:
+
+```text
+/admin/view-index-demo
+```
+
+View used:
+
+```sql
+CREATE VIEW product_summary_view AS
+SELECT
+    p.product_id,
+    p.product_name,
+    b.brand_name,
+    p.price_usd,
+    p.rating,
+    p.reviews,
+    p.loves_count,
+    p.out_of_stock
+FROM products p, brands b
+WHERE p.brand_id = b.brand_id;
+```
+
+Purpose:
+
+```text
+The view combines product and brand data into one virtual table, making repeated product queries easier to write.
+```
+
+### 8.6 SQL Indexes
+
+Indexes are shown at:
+
+```text
+/admin/view-index-demo
+```
+
+Indexes used:
+
+```sql
+CREATE INDEX idx_products_product_name ON products(product_name);
+CREATE INDEX idx_products_brand_id ON products(brand_id);
+CREATE INDEX idx_products_rating ON products(rating);
+CREATE INDEX idx_products_price ON products(price_usd);
+```
+
+Purpose:
+
+```text
+Indexes are created on frequently searched, filtered, and joined columns to improve query performance.
+```
+
+Note:
+
+```text
+The PRIMARY index on product_id is automatically created because product_id is the primary key.
+```
+
+---
+
+## 9. Project Structure
+
+```text
 glowbase/
-│   app.py                  # Flask routes and application logic
-│   db.py                   # Database connections and auto-bootstrap
+│   app.py
+│   db.py
 │   requirements.txt
-│   .env                    # Local credentials (do not push to GitHub)
-│
-├── data/
-│   ├── glowbasev1.sql                      # Main MariaDB schema and data
-│   ├── populate_product_categories.sql     # Populates the many-to-many junction table
-│   ├── sql_features_triggers.sql           # Trigger definitions
-│   ├── sql_features_views_indexes.sql      # View and index definitions
-│   ├── glowbase.reviews.json               # MongoDB seed data
-│   ├── import_glowbase.bat                 # Windows manual import script
-│   └── import_glowbase.sh                  # macOS/Linux manual import script
+│   .env
+│   .gitignore
+│   README.md
+│   glowbasev1.sql
+│   glowbase.reviews.json
+│   sql_features_triggers.sql
+│   sql_features_views_indexes.sql
 │
 ├── static/
-│   ├── css/style.css
-│   └── js/app.js
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── app.js
 │
 └── templates/
     ├── base.html
@@ -113,9 +427,6 @@ glowbase/
     ├── reviews.html
     ├── submit_review.html
     ├── analytics.html
-    ├── chemicals.html
-    ├── chemical_products.html
-    ├── performance_demo.html
     ├── admin_login.html
     ├── admin_dashboard.html
     ├── admin_products.html
@@ -128,31 +439,55 @@ glowbase/
     └── view_index_demo.html
 ```
 
----
+Do not push these files/folders to GitHub:
 
-## 5. Setup and Installation
-
-### 5.1 Prerequisites
-
-- Python 3.10 or later
-- MariaDB running locally
-- MongoDB running locally
-
-### 5.2 Install Python packages
-
-```bash
-pip install flask mysql-connector-python pymongo python-dotenv
+```text
+.env
+venv/
+__pycache__/
+Large raw dataset files unless required by submission instructions
 ```
 
-Or using the requirements file:
+---
+
+## 10. Requirements
+
+Recommended `requirements.txt`:
+
+```text
+flask
+mysql-connector-python
+pymongo
+python-dotenv
+```
+
+Optional:
+
+```text
+pandas
+```
+
+Pandas is not needed for the main website runtime anymore. It can still be used for data cleaning or import scripts.
+
+Install packages manually:
+
+```bash
+py -m pip install flask mysql-connector-python pymongo python-dotenv
+```
+
+Or install using `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5.3 Configure environment variables
+---
 
-Create a `.env` file in the project root:
+## 11. Environment Variables
+
+Create a `.env` file in the project root.
+
+Example:
 
 ```env
 MARIADB_HOST=localhost
@@ -167,200 +502,332 @@ MONGO_REVIEWS_COLLECTION=reviews
 
 Do not push `.env` to GitHub.
 
-### 5.4 Database setup — automatic
+---
 
-The app auto-bootstraps on startup. When you run the app for the first time, `db.py` will:
+## 12. Database Setup
 
-1. Create the `glowbase` MariaDB database if it does not exist
-2. Import `glowbasev1.sql` if the `products` table is missing
-3. Run `populate_product_categories.sql` to populate the many-to-many junction table
-4. Apply views and indexes from `sql_features_views_indexes.sql`
-5. Apply triggers from `sql_features_triggers.sql`
-6. Seed MongoDB reviews from `glowbase.reviews.json` if the collection is empty
+The app now supports automatic bootstrap on startup.
 
-You only need MariaDB and MongoDB running, and a correct `.env` file.
+When the Flask app starts, it will:
 
-To disable auto-bootstrap, add this to `.env`:
+1. Create the MariaDB database if it does not exist.
+2. Import `data/glowbasev1.sql` automatically when the main `products` table is missing.
+3. Apply `data/sql_features_views_indexes.sql` automatically.
+4. Apply `data/sql_features_triggers.sql` automatically.
+5. Seed MongoDB `reviews` from `data/glowbase.reviews.json` when the collection is empty.
+
+You only need to ensure MariaDB and MongoDB services are running and `.env` values are correct.
+
+Optional environment variables:
 
 ```env
-AUTO_BOOTSTRAP=false
+AUTO_BOOTSTRAP=true
+SEED_DATA_DIR=./data
+```
+
+Set `AUTO_BOOTSTRAP=false` to disable this behavior.
+
+### 12.5 Add SQL view and indexes
+
+Run:
+
+```bat
+"C:\Program Files\MariaDB 12.2\bin\mariadb.exe" -u root -p glowbase < sql_features_views_indexes.sql
+```
+
+Check:
+
+```sql
+SHOW FULL TABLES WHERE Table_type = 'VIEW';
+SHOW INDEX FROM products;
 ```
 
 ---
 
-## 6. Running the App
+## 13. How to Run
 
-### Windows
+### 13.1 Windows
+
+Open Command Prompt in the project folder:
 
 ```bat
-cd glowbase
+cd C:\Users\USER\Documents\GitHub\INF2003-Database-Project\glowbase
+```
+
+Run:
+
+```bat
 py app.py
 ```
 
-### macOS / Linux
+Open:
+
+```text
+http://127.0.0.1:5000/
+```
+
+### 13.2 macOS
+
+Open Terminal in the project folder.
+
+Run:
 
 ```bash
 cd glowbase
+./venv/bin/python3 glowbase/app.py
 python3 app.py
 ```
 
-Open in browser:
+Open:
 
-```
+```text
 http://127.0.0.1:5000/
 ```
 
 ---
 
-## 7. Website Routes
+## 14. Useful Demo Pages
 
-### Public Routes
-
-| Route | Page |
-|---|---|
-| `/` | Home |
-| `/products` | Product listing with search and filter |
-| `/product/<product_id>` | Product detail with reviews |
-| `/reviews` | All reviews |
-| `/submit-review` | Submit a new review |
-| `/analytics` | Analytics dashboard |
-| `/category/<category_name>` | Products filtered by category |
-| `/chemicals` | Chemical ingredient browser |
-| `/chemicals/<chemical_name>` | Products containing a specific chemical |
-
-### Admin Routes
-
-| Route | Page |
-|---|---|
-| `/admin/login` | Admin login |
-| `/admin/logout` | Admin logout |
-| `/admin/dashboard` | Admin dashboard |
-| `/admin/products` | Manage products |
-| `/admin/products/add` | Add a product |
-| `/admin/products/edit/<product_id>` | Edit a product |
-| `/admin/products/delete/<product_id>` | Delete a product |
-| `/admin/reviews` | Manage reviews |
-| `/admin/reviews/edit/<review_id>` | Edit a review |
-| `/admin/reviews/delete/<review_id>` | Delete a review |
-| `/admin/sql-demo` | SQL nested query and many-to-many demo |
-| `/admin/trigger-demo` | SQL trigger demo |
-| `/admin/view-index-demo` | SQL view and index demo |
-| `/admin/performance-demo` | Query performance demo |
-
-**Demo admin credentials:**
-
+```text
+http://127.0.0.1:5000/
+http://127.0.0.1:5000/products
+http://127.0.0.1:5000/reviews
+http://127.0.0.1:5000/submit-review
+http://127.0.0.1:5000/analytics
+http://127.0.0.1:5000/admin/login
+http://127.0.0.1:5000/admin/dashboard
+http://127.0.0.1:5000/admin/products
+http://127.0.0.1:5000/admin/reviews
+http://127.0.0.1:5000/admin/sql-demo
+http://127.0.0.1:5000/admin/trigger-demo
+http://127.0.0.1:5000/admin/view-index-demo
 ```
+
+Admin login:
+
+```text
 Username: admin
 Password: admin123
 ```
 
-These are hardcoded for project demonstration only. A production version would store admin accounts in MariaDB with hashed passwords.
-
 ---
 
-## 8. Database Features
+## 15. Demo Checklist
 
-### 8.1 SQL CRUD
+Before presenting, prepare screenshots/proof for:
 
-| Operation | Where |
-|---|---|
-| Create | Admin → Add Product |
-| Read | Products page, product detail, analytics |
-| Update | Admin → Edit Product |
-| Delete | Admin → Delete Product |
-
-### 8.2 NoSQL CRUD
-
-| Operation | Where |
-|---|---|
-| Create | Public → Submit Review |
-| Read | Public → Reviews page, product detail |
-| Update | Admin → Edit Review |
-| Delete | Admin → Delete Review |
-
-Public users handle Create and Read. Admin handles Update and Delete.
-
-### 8.3 Nested Queries
-
-Located at `/admin/sql-demo`. Six nested query examples:
-
-1. Products above average rating
-2. Products from brands with more than 3 products
-3. Products above average price
-4. Brands above overall average rating
-5. Products with the highest rating
-6. Products from brands with at least one out-of-stock product
-
-### 8.4 Many-to-Many Query
-
-Also located at `/admin/sql-demo`. Demonstrates the `product_categories` junction table with a 4-table JOIN across `products`, `brands`, `product_categories`, and `categories`, using a nested subquery to filter by category size.
-
-### 8.5 Triggers
-
-Located at `/admin/trigger-demo`. Three triggers on the `products` table:
-
-| Trigger | Event | Logs to |
-|---|---|---|
-| `after_product_insert` | AFTER INSERT | `product_add_logs` |
-| `after_product_update` | AFTER UPDATE | `product_audit_logs` |
-| `after_product_delete` | AFTER DELETE | `product_audit_logs` |
-
-### 8.6 View
-
-`product_summary_view` — joins `products` and `brands` into a virtual table for cleaner repeated queries.
-
-### 8.7 Indexes
-
-Four indexes on the `products` table covering the most frequently searched and filtered columns:
-
-```sql
-idx_products_product_name  ON products(product_name)
-idx_products_brand_id      ON products(brand_id)
-idx_products_rating        ON products(rating)
-idx_products_price         ON products(price_usd)
+```text
+1. Home page
+2. Product listing page
+3. Product filtering/search
+4. Product detail page with MongoDB reviews
+5. Submit review form
+6. Admin dashboard
+7. SQL Create: Add product
+8. SQL Read: View products
+9. SQL Update: Edit product
+10. SQL Delete: Delete product
+11. NoSQL Create: Submit review
+12. NoSQL Read: Manage reviews / Reviews page
+13. NoSQL Update: Edit review
+14. NoSQL Delete: Delete review
+15. Nested query demo page
+16. Trigger demo page
+17. View and index demo page
+18. MariaDB tables screenshot
+19. MongoDB collection screenshot
+20. ER diagram
 ```
 
-### 8.8 MongoDB Aggregation Pipeline
+---
 
-Used in the analytics dashboard and the chemicals browser. Example pipeline stages used: `$match`, `$unwind`, `$group`, `$sort` — equivalent to a SQL GROUP BY with filtering.
+## 16. GenAI Usage Note
+
+GenAI was used as a support tool for:
+
+```text
+- Understanding project requirements
+- Planning the MariaDB and MongoDB split
+- Debugging Flask, MariaDB, and MongoDB issues
+- Refactoring pandas/CSV logic into database queries
+- Drafting SQL query examples
+- Structuring README and report content
+```
+
+The team verified and modified the generated suggestions based on:
+
+```text
+- Actual dataset columns
+- Actual MariaDB schema
+- Actual MongoDB document fields
+- Project requirements
+- Application testing results
+```
+
+Final implementation decisions, testing, screenshots, and explanations should be completed and checked by the team.
 
 ---
 
-## 9. Admin Demo Pages
+## 17. Team Notes
 
-Before presenting, verify these pages work and have data:
-
-- `/admin/sql-demo` — all 6 nested queries and the many-to-many query return results
-- `/admin/trigger-demo` — add a product first so the trigger log is not empty
-- `/admin/view-index-demo` — view and indexes should already be applied on startup
-
----
-
-## 10. Environment Variables
-
-| Variable | Purpose |
-|---|---|
-| `MARIADB_HOST` | MariaDB host (usually `localhost`) |
-| `MARIADB_USER` | MariaDB username |
-| `MARIADB_PASSWORD` | MariaDB password |
-| `MARIADB_DATABASE` | Database name (`glowbase`) |
-| `MONGO_URI` | MongoDB connection string |
-| `MONGO_DATABASE` | MongoDB database name (`glowbase`) |
-| `MONGO_REVIEWS_COLLECTION` | Collection name (`reviews`) |
-| `AUTO_BOOTSTRAP` | Set to `false` to disable auto-setup on startup (default: `true`) |
-| `SEED_DATA_DIR` | Override path to the `data/` folder (optional) |
+```text
+- Start MariaDB before running the app.
+- Start MongoDB before running the app.
+- Make sure .env values match your local database username/password.
+- Do not push .env to GitHub.
+- Do not push venv to GitHub.
+- If MongoDB reviews do not show, check that MongoDB is running.
+- If MariaDB pages fail, check that the MariaDB user in .env has CREATE/ALTER/INDEX/TRIGGER permissions.
+- If trigger demo is empty, add a product first.
+- If bootstrap is disabled, set AUTO_BOOTSTRAP=true or import SQL/JSON files manually.
+```
 
 ---
 
-## 11. Team Notes
+## 18. Final Project Status
 
-- Start MariaDB before running the app
-- Start MongoDB before running the app
-- Make sure `.env` values match your local database credentials
-- Do not push `.env` or `venv/` to GitHub
-- If the trigger demo page is empty, add a product first to fire the insert trigger
-- If MongoDB reviews do not appear, check that MongoDB is running and the collection was seeded
-- If MariaDB pages fail on startup, check that your MariaDB user has CREATE, ALTER, INDEX, and TRIGGER permissions
+```text
+Coding/database features: mostly complete
+Report screenshots/evidence: still need to prepare
+ER diagram: still need to include in report
+GenAI reflection: still need to include in report
+```
 
+---
 
-fiona test
+# To Do
+
+## 1. Populate or explain the `product_categories` table
+
+The SQL dump currently has no data in the `product_categories` junction table. This means the many-to-many relationship between products and categories exists in the schema, but there is no actual data showing the relationship.
+
+Action:
+
+```text
+Either populate product_categories with valid product-category links,
+or explain in the report why this table is empty.
+```
+
+Why this matters:
+
+```text
+An empty junction table weakens the ER diagram explanation because the many-to-many relationship is not demonstrated with real data.
+```
+
+---
+
+## 2. Add another SQL trigger
+
+The project currently has `after_product_insert`, but there is no trigger for update or delete.
+
+Suggested improvement:
+
+```text
+Add after_product_delete.
+```
+
+Example purpose:
+
+```text
+When an admin deletes a product, MariaDB automatically inserts a DELETE audit log into product_audit_logs.
+```
+
+This is not strictly required, but it makes the trigger feature stronger.
+
+---
+
+## 3. Explain MongoDB CRUD clearly in the report
+
+The public side supports:
+
+```text
+NoSQL Create → Submit review
+NoSQL Read   → View reviews
+```
+
+The admin side supports:
+
+```text
+NoSQL Update → Edit review
+NoSQL Delete → Delete review
+```
+
+Important report note:
+
+```text
+Public users can create and read reviews.
+Admin users handle update and delete actions for MongoDB reviews.
+```
+
+This is acceptable, but it should be clearly explained in the report.
+
+---
+
+## 4. Add performance analysis or query comparison
+
+The project has SQL indexes, but the report can be stronger by showing an `EXPLAIN` comparison.
+
+Suggested evidence:
+
+```text
+Show EXPLAIN output before and after using indexes,
+or explain how indexes help with product filtering/search.
+```
+
+This is optional, but it can strengthen the database discussion.
+
+---
+
+## 5. Explain hardcoded admin password
+
+The admin password is currently hardcoded in `app.py`.
+
+Current demo login:
+
+```text
+Username: admin
+Password: admin123
+```
+
+Report explanation:
+
+```text
+This is used only for project demonstration. A production version should store admin accounts in MariaDB and use password hashing instead of hardcoding credentials.
+```
+
+---
+
+## 6. Display SQL statements when users filter products
+
+When users search or filter products on the website, display the SQL statement used for the query on the page.
+
+Suggested location:
+
+```text
+Products page
+Admin products page, if filtering is available there
+SQL demo page, if needed
+```
+
+Purpose:
+
+```text
+This helps demonstrate the actual SQL query used by the application when filtering product data.
+```
+
+Suggested display format:
+
+```text
+SQL statement used:
+SELECT ...
+FROM ...
+WHERE ...
+ORDER BY ...
+```
+
+Important:
+
+```text
+Display a safe demonstration version of the SQL statement.
+Do not expose database passwords or sensitive environment values.
+```

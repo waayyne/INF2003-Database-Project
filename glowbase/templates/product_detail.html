@@ -2,80 +2,233 @@
 
 {% block content %}
 
-<section class="container">
+<section class="page-header product-detail-header">
+    <div class="product-detail-hero">
+        <div>
+            <a href="/products" class="back-link">&larr; Back to products</a>
+            <h1>{{ product.product_name }}</h1>
+            <p>{{ product.brand_name }} &middot; Product ID {{ product.product_id }}</p>
 
-    <div class="detail-card">
-        <h1>{{ product.product_name }}</h1>
+            <div class="product-detail-badges">
+                {% if product.out_of_stock == 1 %}
+                <span class="status-pill no">Out of Stock</span>
+                {% else %}
+                <span class="status-pill yes">In Stock</span>
+                {% endif %}
 
-        <p><strong>Brand:</strong> {{ product.brand_name }}</p>
-
-        <!-- Display multiple categories -->
-        <p><strong>Categories:</strong></p>
-        <ul>
-            {% for cat in product.categories %}
-            <li>{{ cat.primary_category }}
-                {% if cat.secondary_category %}→ {{ cat.secondary_category }}{% endif %}
-                {% if cat.tertiary_category %}→ {{ cat.tertiary_category }}{% endif %}
-            </li>
-            {% else %}
-            <li>No categories assigned</li>
-            {% endfor %}
-        </ul>
-
-        <div class="detail-grid">
-            <div class="detail-box">
-                <h3>Price</h3>
-                <p>${{ product.price_usd }}</p>
-            </div>
-
-            <div class="detail-box">
-                <h3>Rating</h3>
-                <p>{{ product.rating }}</p>
-            </div>
-
-            <div class="detail-box">
-                <h3>Reviews</h3>
-                <p>{{ product.reviews }}</p>
-            </div>
-
-            <div class="detail-box">
-                <h3>Loves Count</h3>
-                <p>{{ product.loves_count }}</p>
+                {% if product.sephora_exclusive %}
+                <span class="profile-pill">Sephora Exclusive</span>
+                {% endif %}
+                {% if product.online_only %}
+                <span class="profile-pill">Online Only</span>
+                {% endif %}
+                {% if product.limited_edition %}
+                <span class="profile-pill">Limited Edition</span>
+                {% endif %}
+                {% if product.new %}
+                <span class="profile-pill">New</span>
+                {% endif %}
             </div>
         </div>
+    </div>
+</section>
 
-        <p><strong>Size:</strong> {{ product.size }}</p>
-        <p><strong>Out of Stock:</strong> {{ product.out_of_stock }}</p>
+<section class="container product-detail-container">
 
-        <p><strong>Ingredients:</strong> {{ product.ingredients }}</p>
-        <p><strong>Highlights:</strong> {{ product.highlights }}</p>
-        {% if product.chemicals %}
-        <div class="detail-card" style="margin-top: 20px;">
-            <h2>Chemical Ingredients</h2>
-            <div class="detail-grid">
-                {% for chemical in product.chemicals %}
-                <div class="detail-box">
-                    <h3>{{ chemical }}</h3>
+    <div class="product-detail-grid">
+        <main class="product-detail-main">
+            <section class="dashboard-card product-detail-card">
+                <div class="product-detail-section-heading">
+                    <span class="section-kicker">Info</span>
+                    <div>
+                        <h2>Product Overview</h2>
+                        <p>Core details from the MariaDB product record.</p>
+                    </div>
                 </div>
-                {% endfor %}
+
+                <div class="product-detail-stats">
+                    <div class="detail-box">
+                        <strong>Price</strong>
+                        <span>${{ product.price_usd }}</span>
+                    </div>
+                    <div class="detail-box">
+                        <strong>Rating</strong>
+                        <span>{{ product.rating or "N/A" }}/5</span>
+                    </div>
+                    <div class="detail-box">
+                        <strong>Reviews</strong>
+                        <span>{{ product.reviews or 0 }}</span>
+                    </div>
+                    <div class="detail-box">
+                        <strong>Loves</strong>
+                        <span>{{ product.loves_count or 0 }}</span>
+                    </div>
+                </div>
+
+                <div class="product-detail-data-grid overview-data-grid">
+                    <div>
+                        <h3>Categories</h3>
+                        <div class="product-category-list">
+                            {% for cat in product.categories %}
+                            <span>
+                                {{ cat.primary_category }}
+                                {% if cat.secondary_category %}&rarr; {{ cat.secondary_category }}{% endif %}
+                                {% if cat.tertiary_category %}&rarr; {{ cat.tertiary_category }}{% endif %}
+                            </span>
+                            {% else %}
+                            <span>No categories assigned</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Size &amp; Variation</h3>
+                        <dl class="product-detail-list compact-list">
+                            <div>
+                                <dt>Size</dt>
+                                <dd>{{ product.size or "Not listed" }}</dd>
+                            </div>
+                            <div>
+                                <dt>Variation Type</dt>
+                                <dd>{{ product.variation_type or "Not listed" }}</dd>
+                            </div>
+                            <div>
+                                <dt>Variation Value</dt>
+                                <dd>{{ product.variation_value or "Not listed" }}</dd>
+                            </div>
+                            <div>
+                                <dt>Variation Description</dt>
+                                <dd>{{ product.variation_desc or "Not listed" }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-card product-detail-card">
+                <div class="product-detail-section-heading">
+                    <span class="section-kicker">JSON</span>
+                    <div>
+                        <h2>Ingredients &amp; Highlights</h2>
+                        <p>Stored product text used for detail display and admin editing.</p>
+                    </div>
+                </div>
+
+                <div class="product-detail-data-grid">
+                    <div class="product-json-panel">
+                        <h3>Ingredients</h3>
+                        <pre>{{ product.ingredients or "No ingredients listed." }}</pre>
+                    </div>
+                    <div class="product-json-panel">
+                        <h3>Highlights</h3>
+                        <pre>{{ product.highlights or "No highlights listed." }}</pre>
+                    </div>
+                </div>
+            </section>
+
+            {% if product.chemicals %}
+            <section class="dashboard-card product-detail-card">
+                <div class="product-detail-section-heading">
+                    <span class="section-kicker">MongoDB</span>
+                    <div>
+                        <h2>Chemical Ingredients</h2>
+                        <p>Chemicals mentioned in MongoDB reviews for this product.</p>
+                    </div>
+                </div>
+
+                <div class="product-chemical-list">
+                    {% for chemical in product.chemicals %}
+                    <a href="/chemicals/{{ chemical|urlencode }}" class="badge">{{ chemical }}</a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </main>
+
+        <aside class="product-detail-sidebar">
+            <div class="dashboard-card product-detail-card">
+                <h2>Pricing</h2>
+                <dl class="product-detail-list">
+                    <div>
+                        <dt>Current Price</dt>
+                        <dd>${{ product.price_usd }}</dd>
+                    </div>
+                    <div>
+                        <dt>Value Price</dt>
+                        <dd>{% if product.value_price_usd %}${{ product.value_price_usd }}{% else %}Not listed{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Sale Price</dt>
+                        <dd>{% if product.sale_price_usd %}${{ product.sale_price_usd }}{% else %}Not listed{% endif %}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="dashboard-card product-detail-card">
+                <h2>Product Flags</h2>
+                <div class="product-flag-list">
+                    <span class="{% if product.out_of_stock == 1 %}status-pill no{% else %}status-pill yes{% endif %}">
+                        {% if product.out_of_stock == 1 %}Out of Stock{% else %}In Stock{% endif %}
+                    </span>
+                    <span class="status-pill {% if product.online_only %}yes{% endif %}">Online Only: {% if product.online_only %}Yes{% else %}No{% endif %}</span>
+                    <span class="status-pill {% if product.sephora_exclusive %}yes{% endif %}">Sephora Exclusive: {% if product.sephora_exclusive %}Yes{% else %}No{% endif %}</span>
+                    <span class="status-pill {% if product.limited_edition %}yes{% endif %}">Limited Edition: {% if product.limited_edition %}Yes{% else %}No{% endif %}</span>
+                    <span class="status-pill {% if product.new %}yes{% endif %}">New: {% if product.new %}Yes{% else %}No{% endif %}</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <section class="product-related-section">
+        <div class="product-detail-section-heading">
+            <span class="section-kicker">Reviews</span>
+            <div>
+                <h2>Related Reviews</h2>
+                <p>Up to 10 MongoDB reviews linked to this product.</p>
             </div>
         </div>
-        {% endif %}
-    </div>
 
-    <h2>Related Reviews</h2>
+        <div class="review-list reviews-grid">
+            {% for review in reviews %}
+            <div class="review-card">
+                <aside class="review-person">
+                    <div class="review-avatar">
+                        RV
+                    </div>
+                    <p>Reviewer</p>
+                    <span>{{ review.submission_time or "Date unknown" }}</span>
+                </aside>
 
-    <div class="review-list">
-        {% for review in reviews %}
-        <div class="review-card">
-            <h3>{{ review.review_title }}</h3>
-            <p class="review-meta">Rating: {{ review.rating }}</p>
-            <p>{{ review.review_text }}</p>
+                <div class="review-content">
+                    <div class="review-topline">
+                        <div>
+                            <h3>{{ review.review_title or "Untitled review" }}</h3>
+                            <p class="review-meta">Rating: {{ review.rating or "N/A" }}/5</p>
+                        </div>
+
+                        <div class="review-rating">
+                            {% for star in range(1, 6) %}
+                                {% if review.rating|float >= star %}
+                                <span class="filled">&#9733;</span>
+                                {% else %}
+                                <span>&#9733;</span>
+                                {% endif %}
+                            {% endfor %}
+                            <strong>{{ review.rating or "N/A" }}/5</strong>
+                        </div>
+                    </div>
+
+                    <p class="review-text">{{ review.review_text or "No review text available." }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="dashboard-card empty-state-card">
+                <h3>No reviews found for this product.</h3>
+                <p>Reviews will appear here when MongoDB has matching documents for this product ID.</p>
+            </div>
+            {% endfor %}
         </div>
-        {% else %}
-        <p>No reviews found for this product.</p>
-        {% endfor %}
-    </div>
+    </section>
 
 </section>
 

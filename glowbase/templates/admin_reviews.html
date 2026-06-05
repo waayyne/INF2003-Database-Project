@@ -75,14 +75,15 @@
 
     </form>
 
-    <p>
+    <p class="admin-result-pill">
         Showing {{ reviews|length }} review(s)
         {% if total_matching_reviews is defined %}
             out of {{ total_matching_reviews }} matching review(s).
         {% endif %}
     </p>
 
-    <table>
+    <div class="admin-table-card">
+    <table class="admin-table">
         <thead>
             <tr>
                 <th>Product</th>
@@ -97,17 +98,17 @@
         <tbody>
             {% for review in reviews %}
                 <tr>
-                    <td>{{ review.product_name }}</td>
+                    <td><strong>{{ review.product_name }}</strong></td>
                     <td>{{ review.brand_name }}</td>
-                    <td>{{ review.rating }}</td>
+                    <td><span class="rating-pill">{{ review.rating }} / 5</span></td>
 
                     <td>
                         {% if review.is_recommended == 1 %}
-                            Yes
+                            <span class="status-pill yes">Yes</span>
                         {% elif review.is_recommended == 0 %}
-                            No
+                            <span class="status-pill no">No</span>
                         {% else %}
-                            Unknown
+                            <span class="status-pill">Unknown</span>
                         {% endif %}
                     </td>
 
@@ -119,7 +120,7 @@
                         {% endif %}
                     </td>
 
-                    <td>
+                    <td class="table-actions">
                         <a href="/admin/reviews/edit/{{ review._id }}" class="btn">
                             Edit
                         </a>
@@ -138,6 +139,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
 </section>
 

@@ -1,35 +1,35 @@
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Python environments
+# Virtual environment
 venv/
 .venv/
 
-# Python cache / build artifacts
-__pycache__/
-*.py[cod]
-*.so
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Logs and runtime artifacts
-*.log
-server.pid
-
-# Local environment secrets
+# Environment variables
 .env
 .env.*
 
-# SQLite / local DB files
+
+# Flask
+instance/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dataset files
+data/*.csv
+
+# Database files
 *.db
 *.sqlite3
 
-# Flask instance directory
-instance/
-
-# Jupyter
-.ipynb_checkpoints/
+# Logs / runtime artifacts
+*.log
+*.pid

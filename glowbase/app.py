@@ -1261,27 +1261,6 @@ def sql_demo():
     """)
     brands_with_out_of_stock_products = cursor.fetchall()
 
-    # Many-to-Many Query:
-    # Products and their categories via the product_categories junction table,
-    # filtered to only categories that have more than 5 products assigned.
-    cursor.execute("""
-        SELECT p.product_id, p.product_name, b.brand_name,
-               c.secondary_category, c.tertiary_category, p.rating
-        FROM products p
-        JOIN brands b ON p.brand_id = b.brand_id
-        JOIN product_categories pc ON p.product_id = pc.product_id
-        JOIN categories c ON pc.category_id = c.category_id
-        WHERE pc.category_id IN (
-            SELECT category_id
-            FROM product_categories
-            GROUP BY category_id
-            HAVING COUNT(*) > 5
-        )
-        ORDER BY c.secondary_category, p.rating DESC
-        LIMIT 20
-    """)
-    category_products = cursor.fetchall()
-
     cursor.close()
     conn.close()
 
@@ -1292,8 +1271,7 @@ def sql_demo():
         above_average_price_products=above_average_price_products,
         high_rating_brands=high_rating_brands,
         highest_rating_products=highest_rating_products,
-        brands_with_out_of_stock_products=brands_with_out_of_stock_products,
-        category_products=category_products
+        brands_with_out_of_stock_products=brands_with_out_of_stock_products
     )
 
 
@@ -1484,33 +1462,13 @@ def view_index_demo():
     cursor.execute("SHOW INDEX FROM products")
     index_results = cursor.fetchall()
 
-    # EXPLAIN without index: force full table scan by ignoring the index
-    cursor.execute("""
-        EXPLAIN SELECT product_id, product_name, rating, price_usd
-        FROM products IGNORE INDEX (idx_products_rating)
-        WHERE rating >= 4.5
-        ORDER BY rating DESC
-    """)
-    explain_no_index = cursor.fetchall()
-
-    # EXPLAIN with index: normal query that uses idx_products_rating
-    cursor.execute("""
-        EXPLAIN SELECT product_id, product_name, rating, price_usd
-        FROM products
-        WHERE rating >= 4.5
-        ORDER BY rating DESC
-    """)
-    explain_with_index = cursor.fetchall()
-
     cursor.close()
     conn.close()
 
     return render_template(
         "view_index_demo.html",
         view_results=view_results,
-        index_results=index_results,
-        explain_no_index=explain_no_index,
-        explain_with_index=explain_with_index
+        index_results=index_results
     )
 
 @app.route("/category/<category_name>")
@@ -1659,89 +1617,50 @@ def performance_demo():
 @app.route("/chemicals")
 def chemicals():
     reviews_collection = get_mongo_collection()
-
-    # Get only product IDs that exist in MariaDB
-    conn = get_mariadb_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("SELECT product_id FROM products")
-    valid_product_ids = [str(row["product_id"]) for row in cursor.fetchall()]
-
-    cursor.close()
-    conn.close()
-
-    # Count unique products per chemical, but only if product exists in MariaDB
+    
+    # Get unique chemicals across all reviews
     pipeline = [
-        {
-            "$match": {
-                "product_id": {"$in": valid_product_ids},
-                "chemicals": {"$exists": True, "$ne": []}
-            }
-        },
         {"$unwind": "$chemicals"},
-        {
-            "$group": {
-                "_id": "$chemicals",
-                "product_ids": {"$addToSet": "$product_id"}
-            }
-        },
-        {
-            "$project": {
-                "_id": 1,
-                "count": {"$size": "$product_ids"}
-            }
-        },
+        {"$group": {"_id": "$chemicals", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {"$limit": 50}
     ]
-
+    
     chemical_stats = list(reviews_collection.aggregate(pipeline))
-
+    
     return render_template("chemicals.html", chemicals=chemical_stats)
-
 
 @app.route("/chemicals/<chemical_name>")
 def chemical_products(chemical_name):
     reviews_collection = get_mongo_collection()
-
+    
+    # Find all products containing this chemical
     reviews = reviews_collection.find({"chemicals": chemical_name})
-
-    product_ids = list(set([
-        str(r.get("product_id")) for r in reviews
-        if r.get("product_id") is not None
-    ]))
-
+    product_ids = list(set([r.get("product_id") for r in reviews]))
+    
+    # Get full product details from MariaDB
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
-
+    
     if product_ids:
-        placeholders = ",".join(["%s"] * len(product_ids))
-
+        placeholders = ','.join(['%s'] * len(product_ids))
         cursor.execute(f"""
-            SELECT 
-                p.product_id,
-                p.product_name,
-                COALESCE(b.brand_name, 'Unknown Brand') AS brand_name,
-                p.price_usd,
-                p.rating
+            SELECT p.product_id, p.product_name, b.brand_name, p.price_usd, p.rating
             FROM products p
-            LEFT JOIN brands b ON p.brand_id = b.brand_id
+            JOIN brands b ON p.brand_id = b.brand_id
             WHERE p.product_id IN ({placeholders})
             ORDER BY p.product_name
         """, product_ids)
-
         products = cursor.fetchall()
     else:
         products = []
-
+    
     cursor.close()
     conn.close()
-
-    return render_template(
-        "chemical_products.html",
-        chemical=chemical_name,
-        products=products
-    )
+    
+    return render_template("chemical_products.html", 
+                          chemical=chemical_name, 
+                          products=products)
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

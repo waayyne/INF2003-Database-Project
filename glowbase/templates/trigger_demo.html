@@ -2,184 +2,208 @@
 
 {% block content %}
 
-<section class="page-header">
-    <h1>Trigger Demo</h1>
-    <p>Automatic logging for INSERT, UPDATE, and DELETE operations.</p>
+<section class="page-header trigger-demo-header">
+    <div class="page-title-with-icon">
+        <div class="page-title-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path d="M13 2L4 14h6l-1 8 9-12h-6z"></path>
+            </svg>
+        </div>
+        <div>
+            <h1>Trigger Demo</h1>
+            <p class="section-text">Automatic logging for INSERT, UPDATE, and DELETE operations.</p>
+        </div>
+    </div>
 </section>
 
-<section class="container">
-
+<section class="container sql-demo-container trigger-demo-container">
     <div class="admin-actions">
-        <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
+        <a href="/admin/dashboard" class="secondary-link">&larr; Back to Dashboard</a>
+        <a href="/admin/products/add" class="secondary-link">Add Product</a>
+        <a href="/admin/products" class="secondary-link">Manage Products</a>
     </div>
 
-    <div class="dashboard-card">
-        <h2>Triggers on Products Table</h2>
-
-        <div class="detail-grid">
-            <div class="detail-box">
-                <h3>after_product_insert</h3>
-                <p>Logs when admin adds a new product</p>
-                <code>action_type = 'INSERT'</code>
-            </div>
-            <div class="detail-box">
-                <h3>after_product_update</h3>
-                <p>Logs when admin edits a product (shows what changed)</p>
-                <code>action_type = 'UPDATE'</code>
-            </div>
-            <div class="detail-box">
-                <h3>after_product_delete</h3>
-                <p>Logs when admin deletes a product</p>
-                <code>action_type = 'DELETE'</code>
-            </div>
+    <div class="trigger-summary-grid">
+        <div class="trigger-summary-card insert">
+            <span class="trigger-pill insert">INSERT</span>
+            <h2>after_product_insert</h2>
+            <p>Logs when an admin adds a new product.</p>
+            <code>product_add_logs</code>
+        </div>
+        <div class="trigger-summary-card update">
+            <span class="trigger-pill update">UPDATE</span>
+            <h2>after_product_update</h2>
+            <p>Logs edits and records changed fields.</p>
+            <code>product_audit_logs</code>
+        </div>
+        <div class="trigger-summary-card delete">
+            <span class="trigger-pill delete">DELETE</span>
+            <h2>after_product_delete</h2>
+            <p>Logs when an admin deletes a product.</p>
+            <code>product_audit_logs</code>
         </div>
     </div>
 
-    <br>
+    <div class="sql-split-layout">
+        <aside class="sql-demo-sidebar">
+            <div class="sql-demo-nav">
+                <h3>Trigger Sections</h3>
+                <a class="sql-demo-link" href="#add-logs">Product Add Logs</a>
+                <a class="sql-demo-link" href="#audit-logs">Product Audit Logs</a>
+                <a class="sql-demo-link" href="#test-triggers">How to Test</a>
+                <a class="sql-demo-link" href="#trigger-code">Trigger SQL Code</a>
+            </div>
+        </aside>
 
-    <div class="dashboard-card">
-        <h2>Product Add Logs</h2>
+        <div class="sql-demo-content">
+            <article id="add-logs" class="dashboard-card sql-demo-card trigger-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill performance-pill">Insert Trigger</span>
+                        <h2>Product Add Logs</h2>
+                        <p>These logs are created automatically by the insert trigger. No application code is required to write to this table.</p>
+                    </div>
+                </div>
 
-        <p>
-            These logs are created <strong>automatically</strong> by the insert trigger.
-            No application code is required to write to this table.
-        </p>
+                <div class="admin-table-card performance-table-card">
+                    <table class="admin-table performance-table">
+                        <thead>
+                            <tr>
+                                <th>Log ID</th>
+                                <th>Product ID</th>
+                                <th>Product Name</th>
+                                <th>Action</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Log ID</th>
-                    <th>Product ID</th>
-                    <th>Product Name</th>
-                    <th>Action</th>
-                    <th>Timestamp</th>
-                </tr>
-            </thead>
+                        <tbody>
+                            {% for log in add_logs %}
+                            <tr>
+                                <td><span class="code-pill">{{ log.log_id }}</span></td>
+                                <td>{{ log.product_id }}</td>
+                                <td>{{ log.product_name }}</td>
+                                <td><span class="trigger-pill insert">INSERT</span></td>
+                                <td>{{ log.created_at }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5">No add logs yet. Try adding a product.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for log in add_logs %}
-                <tr>
-                    <td>{{ log.log_id }}</td>
-                    <td>{{ log.product_id }}</td>
-                    <td>{{ log.product_name }}</td>
-                    <td>
-                        <span style="color: green;">➕ INSERT</span>
-                    </td>
-                    <td>{{ log.created_at }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5">No add logs yet. Try adding a product.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article id="audit-logs" class="dashboard-card sql-demo-card trigger-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill">Update / Delete Triggers</span>
+                        <h2>Product Audit Logs</h2>
+                        <p>These logs are created automatically by the update and delete triggers.</p>
+                    </div>
+                </div>
 
-    <br>
+                <div class="admin-table-card performance-table-card">
+                    <table class="admin-table performance-table">
+                        <thead>
+                            <tr>
+                                <th>Log ID</th>
+                                <th>Product ID</th>
+                                <th>Product Name</th>
+                                <th>Action</th>
+                                <th>Details / Changes</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
 
-    <div class="dashboard-card">
-        <h2>Product Audit Logs</h2>
+                        <tbody>
+                            {% for log in audit_logs %}
+                            <tr>
+                                <td><span class="code-pill">{{ log.log_id }}</span></td>
+                                <td>{{ log.product_id }}</td>
+                                <td>{{ log.product_name }}</td>
+                                <td>
+                                    {% if log.action_type == 'UPDATE' %}
+                                    <span class="trigger-pill update">UPDATE</span>
+                                    {% elif log.action_type == 'DELETE' %}
+                                    <span class="trigger-pill delete">DELETE</span>
+                                    {% else %}
+                                    <span class="trigger-pill">{{ log.action_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.changed_fields %}
+                                    {{ log.changed_fields }}
+                                    {% else %}
+                                    &mdash;
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.created_at }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6">No audit logs yet. Try editing or deleting a product.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-        <p>
-            These logs are created <strong>automatically</strong> by the update and delete triggers.
-        </p>
+            <article id="test-triggers" class="dashboard-card sql-demo-card trigger-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill view-pill">Testing Flow</span>
+                        <h2>How to Test All Triggers</h2>
+                        <p>Use the admin UI to prove each database trigger fires automatically.</p>
+                    </div>
+                </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Log ID</th>
-                    <th>Product ID</th>
-                    <th>Product Name</th>
-                    <th>Action</th>
-                    <th>Details / Changes</th>
-                    <th>Timestamp</th>
-                </tr>
-            </thead>
+                <div class="trigger-test-grid">
+                    <div class="trigger-test-card">
+                        <span class="trigger-pill insert">INSERT</span>
+                        <h3>Add Product</h3>
+                        <ol>
+                            <li>Go to <a href="/admin/products/add">Add Product</a></li>
+                            <li>Add a new product, such as "Test Product"</li>
+                            <li>Check Product Add Logs for a new INSERT record</li>
+                        </ol>
+                    </div>
+                    <div class="trigger-test-card">
+                        <span class="trigger-pill update">UPDATE</span>
+                        <h3>Edit Product</h3>
+                        <ol>
+                            <li>Go to <a href="/admin/products">Manage Products</a></li>
+                            <li>Open Edit and change name, price, rating, or stock</li>
+                            <li>Check Product Audit Logs for changed fields</li>
+                        </ol>
+                    </div>
+                    <div class="trigger-test-card">
+                        <span class="trigger-pill delete">DELETE</span>
+                        <h3>Delete Product</h3>
+                        <ol>
+                            <li>Go to <a href="/admin/products">Manage Products</a></li>
+                            <li>Delete the test product and confirm deletion</li>
+                            <li>Check Product Audit Logs for a DELETE record</li>
+                        </ol>
+                    </div>
+                </div>
+            </article>
 
-            <tbody>
-                {% for log in audit_logs %}
-                <tr>
-                    <td>{{ log.log_id }}</td>
-                    <td>{{ log.product_id }}</td>
-                    <td>{{ log.product_name }}</td>
-                    <td>
-                        {% if log.action_type == 'UPDATE' %}
-                        <span style="color: orange;">✏️ UPDATE</span>
-                        {% elif log.action_type == 'DELETE' %}
-                        <span style="color: red;">🗑️ DELETE</span>
-                        {% else %}
-                        {{ log.action_type }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if log.changed_fields %}
-                        {{ log.changed_fields }}
-                        {% else %}
-                        —
-                        {% endif %}
-                    </td>
-                    <td>{{ log.created_at }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="6">No audit logs yet. Try editing or deleting a product.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article id="trigger-code" class="dashboard-card sql-demo-card trigger-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill">SQL Code</span>
+                        <h2>Trigger SQL Code</h2>
+                        <p>The trigger definitions used by the MariaDB products table.</p>
+                    </div>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>How to Test All Triggers</h2>
-
-        <ol>
-            <li>
-                <strong>Test INSERT trigger:</strong>
-                <ul>
-                    <li>Go to <a href="/admin/products/add">Add Product</a></li>
-                    <li>Add a new product (e.g., "Test Product" with price $19.99)</li>
-                    <li>Check the add logs table above → Should show an INSERT record</li>
-                </ul>
-            </li>
-            <br>
-            <li>
-                <strong>Test UPDATE trigger:</strong>
-                <ul>
-                    <li>Go to <a href="/admin/products">Manage Products</a></li>
-                    <li>Find the product you just added and click "Edit"</li>
-                    <li>Change something (name, price, rating, etc.)</li>
-                    <li>Click "Update Product"</li>
-                    <li>Check the audit logs table above → Should show an UPDATE record with specific changes</li>
-                </ul>
-            </li>
-            <br>
-            <li>
-                <strong>Test DELETE trigger:</strong>
-                <ul>
-                    <li>Go to <a href="/admin/products">Manage Products</a></li>
-                    <li>Find the product you just added and click "Delete"</li>
-                    <li>Confirm deletion</li>
-                    <li>Check the audit logs table above → Should show a DELETE record</li>
-                </ul>
-            </li>
-        </ol>
-    </div>
-
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Trigger SQL Code</h2>
-
-        <details>
-            <summary style="cursor: pointer; color: #c94f88; font-weight: bold;">
-                View INSERT Trigger
-            </summary>
-            <pre
-                style="background: #2b1b25; color: #ffb6d5; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 10px;">
-CREATE TRIGGER after_product_insert
+                <details class="trigger-code">
+                    <summary>View INSERT Trigger</summary>
+                    <pre>CREATE TRIGGER after_product_insert
 AFTER INSERT ON products
 FOR EACH ROW
 BEGIN
@@ -191,39 +215,35 @@ BEGIN
         CONCAT('Added new product: ', NEW.product_name, ' ($', NEW.price_usd, ')')
     );
 END</pre>
-        </details>
+                </details>
 
-        <details>
-            <summary style="cursor: pointer; color: #c94f88; font-weight: bold; margin-top: 10px;">
-                View UPDATE Trigger
-            </summary>
-            <pre
-                style="background: #2b1b25; color: #ffb6d5; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 10px;">
-CREATE TRIGGER after_product_update
+                <details class="trigger-code">
+                    <summary>View UPDATE Trigger</summary>
+                    <pre>CREATE TRIGGER after_product_update
 AFTER UPDATE ON products
 FOR EACH ROW
 BEGIN
     DECLARE changes VARCHAR(2000);
     SET changes = '';
-    
+
     -- Track product_name changes
     IF OLD.product_name != NEW.product_name THEN
-        SET changes = CONCAT(changes, 'product_name: "', OLD.product_name, 
-                            '" → "', NEW.product_name, '"; ');
+        SET changes = CONCAT(changes, 'product_name: "', OLD.product_name,
+                            '" -> "', NEW.product_name, '"; ');
     END IF;
-    
+
     -- Track price changes
     IF OLD.price_usd != NEW.price_usd THEN
-        SET changes = CONCAT(changes, 'price: $', OLD.price_usd, 
-                            ' → $', NEW.price_usd, '; ');
+        SET changes = CONCAT(changes, 'price: $', OLD.price_usd,
+                            ' -> $', NEW.price_usd, '; ');
     END IF;
-    
+
     -- Track rating changes
     IF OLD.rating != NEW.rating THEN
-        SET changes = CONCAT(changes, 'rating: ', IFNULL(OLD.rating, 0), 
-                            ' → ', IFNULL(NEW.rating, 0), '; ');
+        SET changes = CONCAT(changes, 'rating: ', IFNULL(OLD.rating, 0),
+                            ' -> ', IFNULL(NEW.rating, 0), '; ');
     END IF;
-    
+
     -- Insert log if changes detected
     IF changes != '' THEN
         INSERT INTO product_audit_logs (
@@ -232,15 +252,11 @@ BEGIN
         VALUES (NEW.product_id, NEW.product_name, 'UPDATE', changes);
     END IF;
 END</pre>
-        </details>
+                </details>
 
-        <details>
-            <summary style="cursor: pointer; color: #c94f88; font-weight: bold; margin-top: 10px;">
-                View DELETE Trigger
-            </summary>
-            <pre
-                style="background: #2b1b25; color: #ffb6d5; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 10px;">
-CREATE TRIGGER after_product_delete
+                <details class="trigger-code">
+                    <summary>View DELETE Trigger</summary>
+                    <pre>CREATE TRIGGER after_product_delete
 AFTER DELETE ON products
 FOR EACH ROW
 BEGIN
@@ -252,9 +268,10 @@ BEGIN
         CONCAT('Deleted product: ', OLD.product_name, ' ($', OLD.price_usd, ')')
     );
 END</pre>
-        </details>
+                </details>
+            </article>
+        </div>
     </div>
-
 </section>
 
 {% endblock %}

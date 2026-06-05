@@ -2,31 +2,43 @@
 
 {% block content %}
 
-<section class="page-header">
-    <h1>Admin Login</h1>
-    <p>Login to manage product records.</p>
-</section>
+<section class="form-page admin-login-page">
+    <div class="container admin-login-container">
+        <form method="POST" action="/admin/login" class="form-card admin-login-card">
+            <div class="admin-lock-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                    <path d="M12 14v2"></path>
+                </svg>
+            </div>
 
-<section class="container">
+            <div class="admin-login-heading">
+                <h1>Admin Login</h1>
+                <p>Login to manage product records.</p>
+            </div>
 
-    <form method="POST" action="/admin/login" class="form-card small-form">
+            <div class="form-divider"></div>
 
-        {% if error %}
-            <p class="error-message">{{ error }}</p>
-        {% endif %}
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
 
-        <label>Username</label>
-        <input type="text" name="username" required>
+            <div class="field-group">
+                <label>Username</label>
+                <input type="text" name="username" required placeholder="Enter username">
+            </div>
 
-        <label>Password</label>
-        <input type="password" name="password" required>
+            <div class="field-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="Enter password">
+            </div>
 
-        <button type="submit">Login</button>
+            <button type="submit" class="wide-submit admin-submit">Login</button>
 
-        <p class="hint">Test login: admin / admin123</p>
-
-    </form>
-
+            <p class="hint admin-hint">Test login: admin / admin123</p>
+        </form>
+    </div>
 </section>
 
 {% endblock %}

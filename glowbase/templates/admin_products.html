@@ -14,7 +14,8 @@
         <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
     </div>
 
-    <table>
+    <div class="admin-table-card">
+    <table class="admin-table">
         <thead>
             <tr>
                 <th>Product ID</th>
@@ -29,13 +30,13 @@
         <tbody>
             {% for product in products %}
                 <tr>
-                    <td>{{ product.product_id }}</td>
-                    <td>{{ product.product_name }}</td>
+                    <td><span class="code-pill">{{ product.product_id }}</span></td>
+                    <td><strong>{{ product.product_name }}</strong></td>
                     <td>{{ product.brand_name }}</td>
-                    <td>${{ product.price_usd }}</td>
-                    <td>{{ product.rating }}</td>
-                    <td>
-                        <a href="/admin/products/edit/{{ product.product_id }}" class="btn">Edit</a>
+                    <td><span class="money-pill">${{ product.price_usd }}</span></td>
+                    <td><span class="rating-pill">{{ product.rating }} / 5</span></td>
+                    <td class="table-actions">
+                        <a href="/admin/products/edit/{{ product.product_id }}" class="btn admin-edit-btn">Edit</a>
 
                         <a href="/admin/products/delete/{{ product.product_id }}"
                         class="delete-link"
@@ -47,6 +48,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
 </section>
 
