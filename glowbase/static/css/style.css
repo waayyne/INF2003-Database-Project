@@ -1159,6 +1159,7 @@ button:hover {
     display: grid;
     grid-template-columns: 1fr 220px;
     gap: 12px;
+    margin-bottom: 18px;
     padding: 14px;
 }
 
