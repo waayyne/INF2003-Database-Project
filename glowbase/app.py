@@ -1617,50 +1617,89 @@ def performance_demo():
 @app.route("/chemicals")
 def chemicals():
     reviews_collection = get_mongo_collection()
-    
-    # Get unique chemicals across all reviews
+
+    # Get only product IDs that exist in MariaDB
+    conn = get_mariadb_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT product_id FROM products")
+    valid_product_ids = [str(row["product_id"]) for row in cursor.fetchall()]
+
+    cursor.close()
+    conn.close()
+
+    # Count unique products per chemical, but only if product exists in MariaDB
     pipeline = [
+        {
+            "$match": {
+                "product_id": {"$in": valid_product_ids},
+                "chemicals": {"$exists": True, "$ne": []}
+            }
+        },
         {"$unwind": "$chemicals"},
-        {"$group": {"_id": "$chemicals", "count": {"$sum": 1}}},
+        {
+            "$group": {
+                "_id": "$chemicals",
+                "product_ids": {"$addToSet": "$product_id"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "count": {"$size": "$product_ids"}
+            }
+        },
         {"$sort": {"count": -1}},
         {"$limit": 50}
     ]
-    
+
     chemical_stats = list(reviews_collection.aggregate(pipeline))
-    
+
     return render_template("chemicals.html", chemicals=chemical_stats)
+
 
 @app.route("/chemicals/<chemical_name>")
 def chemical_products(chemical_name):
     reviews_collection = get_mongo_collection()
-    
-    # Find all products containing this chemical
+
     reviews = reviews_collection.find({"chemicals": chemical_name})
-    product_ids = list(set([r.get("product_id") for r in reviews]))
-    
-    # Get full product details from MariaDB
+
+    product_ids = list(set([
+        str(r.get("product_id")) for r in reviews
+        if r.get("product_id") is not None
+    ]))
+
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     if product_ids:
-        placeholders = ','.join(['%s'] * len(product_ids))
+        placeholders = ",".join(["%s"] * len(product_ids))
+
         cursor.execute(f"""
-            SELECT p.product_id, p.product_name, b.brand_name, p.price_usd, p.rating
+            SELECT 
+                p.product_id,
+                p.product_name,
+                COALESCE(b.brand_name, 'Unknown Brand') AS brand_name,
+                p.price_usd,
+                p.rating
             FROM products p
-            JOIN brands b ON p.brand_id = b.brand_id
+            LEFT JOIN brands b ON p.brand_id = b.brand_id
             WHERE p.product_id IN ({placeholders})
             ORDER BY p.product_name
         """, product_ids)
+
         products = cursor.fetchall()
     else:
         products = []
-    
+
     cursor.close()
     conn.close()
-    
-    return render_template("chemical_products.html", 
-                          chemical=chemical_name, 
-                          products=products)
+
+    return render_template(
+        "chemical_products.html",
+        chemical=chemical_name,
+        products=products
+    )
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)
