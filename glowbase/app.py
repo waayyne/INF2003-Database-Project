@@ -1484,13 +1484,33 @@ def view_index_demo():
     cursor.execute("SHOW INDEX FROM products")
     index_results = cursor.fetchall()
 
+    # EXPLAIN without index: force full table scan by ignoring the index
+    cursor.execute("""
+        EXPLAIN SELECT product_id, product_name, rating, price_usd
+        FROM products IGNORE INDEX (idx_products_rating)
+        WHERE rating >= 4.5
+        ORDER BY rating DESC
+    """)
+    explain_no_index = cursor.fetchall()
+
+    # EXPLAIN with index: normal query that uses idx_products_rating
+    cursor.execute("""
+        EXPLAIN SELECT product_id, product_name, rating, price_usd
+        FROM products
+        WHERE rating >= 4.5
+        ORDER BY rating DESC
+    """)
+    explain_with_index = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
     return render_template(
         "view_index_demo.html",
         view_results=view_results,
-        index_results=index_results
+        index_results=index_results,
+        explain_no_index=explain_no_index,
+        explain_with_index=explain_with_index
     )
 
 @app.route("/category/<category_name>")

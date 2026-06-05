@@ -112,6 +112,103 @@ CREATE INDEX idx_products_price ON products(price_usd);
         </table>
     </div>
 
+
+    <br>
+
+    <div class="dashboard-card">
+        <h2>Index Performance: EXPLAIN Comparison</h2>
+
+        <p>
+            The same query is run twice — once forcing a full table scan by ignoring the index,
+            and once using the <strong>idx_products_rating</strong> index normally.
+            The <strong>rows</strong> column shows how many rows MariaDB had to scan to get the result.
+            A lower number means the index is working.
+        </p>
+
+        <h3>Without index (IGNORE INDEX)</h3>
+
+        <pre>
+EXPLAIN SELECT product_id, product_name, rating, price_usd
+FROM products IGNORE INDEX (idx_products_rating)
+WHERE rating >= 4.5
+ORDER BY rating DESC;
+        </pre>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>select_type</th>
+                    <th>table</th>
+                    <th>type</th>
+                    <th>possible_keys</th>
+                    <th>key</th>
+                    <th>rows</th>
+                    <th>Extra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in explain_no_index %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.select_type }}</td>
+                        <td>{{ row.table }}</td>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.possible_keys }}</td>
+                        <td>{{ row.key }}</td>
+                        <td><strong>{{ row.rows }}</strong></td>
+                        <td>{{ row.Extra }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8">No results.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+
+        <h3>With index (idx_products_rating)</h3>
+
+        <pre>
+EXPLAIN SELECT product_id, product_name, rating, price_usd
+FROM products
+WHERE rating >= 4.5
+ORDER BY rating DESC;
+        </pre>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>select_type</th>
+                    <th>table</th>
+                    <th>type</th>
+                    <th>possible_keys</th>
+                    <th>key</th>
+                    <th>rows</th>
+                    <th>Extra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in explain_with_index %}
+                    <tr>
+                        <td>{{ row.id }}</td>
+                        <td>{{ row.select_type }}</td>
+                        <td>{{ row.table }}</td>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.possible_keys }}</td>
+                        <td>{{ row.key }}</td>
+                        <td><strong>{{ row.rows }}</strong></td>
+                        <td>{{ row.Extra }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8">No results.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
 </section>
 
 {% endblock %}
