@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<header class="hero">
+    <div class="hero-content">
+        <h1>Beauty Product Analytics and Review System</h1>
+        <p>Explore Sephora beauty products, discover real user reviews, analyse ingredient safety, and make informed beauty choices.</p>
+        <a href="/products" class="btn">Explore Products</a>
+    </div>
+</header>
+
+<section class="container home-overview">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 8l8-4 8 4-8 4-8-4z"></path>
+                    <path d="M4 8v8l8 4 8-4V8"></path>
+                    <path d="M12 12v8"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>{{ total_products }}</h3>
+                <p>Total Products</p>
+                <span class="stat-note">Live from MariaDB</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 8h12l1 12H5L6 8z"></path>
+                    <path d="M9 8a3 3 0 0 1 6 0"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>{{ total_brands }}</h3>
+                <p>Total Brands</p>
+                <span class="stat-note">Live from MariaDB</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 5h16v11H8l-4 4V5z"></path>
+                    <path d="M12 8l1 2 2 .3-1.5 1.5.4 2.2-1.9-1-1.9 1 .4-2.2L9 10.3l2-.3 1-2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>{{ total_reviews }}</h3>
+                <p>Total Reviews</p>
+                <span class="stat-note">Live from MongoDB</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 13l-7 7-9-9V4h7l9 9z"></path>
+                    <path d="M8 8h.01"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>{{ top_category }}</h3>
+                <p>Top Category</p>
+                <span class="stat-note">Top segment</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container">
+    <div class="feature-grid">
+        <a href="/products" class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                    <path d="M16 16l4 4"></path>
+                </svg>
+            </div>
+            <h3>Product Search</h3>
+            <p>Search products by name, brand, category, rating, and price.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/reviews" class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 5h16v11H8l-4 4V5z"></path>
+                    <path d="M12 8l1 2 2 .3-1.5 1.5.4 2.2-1.9-1-1.9 1 .4-2.2L9 10.3l2-.3 1-2z"></path>
+                </svg>
+            </div>
+            <h3>Review Viewer</h3>
+            <p>View review title, text, rating, skin type, and recommendation status.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/analytics" class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M5 19V9"></path>
+                    <path d="M12 19V5"></path>
+                    <path d="M19 19v-7"></path>
+                    <path d="M3 19h18"></path>
+                </svg>
+            </div>
+            <h3>Analytics Dashboard</h3>
+            <p>Analyse top brands, most-loved products, stock status, and review trends.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+    </div>
+</section>
+
+{% endblock %}

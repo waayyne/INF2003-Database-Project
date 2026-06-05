@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header products-page-header">
+    <h1>Product Listing</h1>
+    <p>Search and filter products by brand, category, rating, and price.</p>
+</section>
+
+<section class="container">
+
+    <form method="GET" action="/products" class="filter-box">
+        <input type="text" name="search" placeholder="Search product name..." value="{{ search }}">
+    
+        <select name="brand">
+            <option value="">All Brands</option>
+            {% for brand in brands %}
+            <option value="{{ brand }}" {% if brand==selected_brand %}selected{% endif %}>
+                {{ brand }}
+            </option>
+            {% endfor %}
+        </select>
+    
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category }}" {% if category==selected_category %}selected{% endif %}>
+                {{ category }}
+            </option>
+            {% endfor %}
+        </select>
+    
+        <!-- NEW: Chemical filter dropdown -->
+        <select name="chemical">
+            <option value="">All Chemicals</option>
+            {% for chemical in chemicals %}
+            <option value="{{ chemical }}" {% if chemical==selected_chemical %}selected{% endif %}>
+                {{ chemical }}
+            </option>
+            {% endfor %}
+        </select>
+    
+        <select name="rating">
+            <option value="">All Ratings</option>
+            <option value="4.5-5" {% if selected_rating=="4.5-5" %}selected{% endif %}>4.5 - 5.0</option>
+            <option value="4.0-4.49" {% if selected_rating=="4.0-4.49" %}selected{% endif %}>4.0 - 4.49</option>
+            <option value="3.5-3.99" {% if selected_rating=="3.5-3.99" %}selected{% endif %}>3.5 - 3.99</option>
+            <option value="0-3.49" {% if selected_rating=="0-3.49" %}selected{% endif %}>Below 3.5</option>
+        </select>
+    
+        <select name="price">
+            <option value="">All Prices</option>
+            <option value="0-25" {% if selected_price=="0-25" %}selected{% endif %}>$0 - $25</option>
+            <option value="25-50" {% if selected_price=="25-50" %}selected{% endif %}>$25 - $50</option>
+            <option value="50-100" {% if selected_price=="50-100" %}selected{% endif %}>$50 - $100</option>
+            <option value="100-9999" {% if selected_price=="100-9999" %}selected{% endif %}>$100+</option>
+        </select>
+    
+        <button type="submit">Filter</button>
+        <a href="/products" class="secondary-link">Reset</a>
+    </form>
+
+    <p class="result-count">Showing up to 100 products</p>
+
+    <div class="product-grid product-list-grid">
+        {% for product in products %}
+        <div class="product-card product-catalog-card">
+            <div class="product-visual">
+                <span>{{ product.brand_name[:1]|upper }}</span>
+                <small>{{ product.brand_name }}</small>
+            </div>
+
+            <div class="product-catalog-body">
+                <h3>{{ product.product_name }}</h3>
+
+                <p class="product-line"><strong>Brand:</strong> {{ product.brand_name }}</p>
+
+                <p class="product-line">
+                    <strong>Category:</strong>
+                    {% if product.categories %}
+                    <span class="product-chip">{{ product.categories }}</span>
+                    {% else %}
+                    <span class="product-chip muted">Not assigned</span>
+                    {% endif %}
+                </p>
+
+                <div class="product-divider"></div>
+
+                <div class="product-price-row">
+                    <p class="price">${{ product.price_usd }}</p>
+                    <p class="product-rating">Rating {{ product.rating }} / 5</p>
+                </div>
+
+                <div class="product-stats-row">
+                    <span>Reviews: {{ product.reviews }}</span>
+                    <span class="love-stat">Loves: <span aria-hidden="true">&hearts;</span> {{ product.loves_count }}</span>
+                </div>
+
+                <div class="product-actions-row">
+                    {% if product.out_of_stock == 1 %}
+                    <span class="badge danger">Out of Stock</span>
+                    {% else %}
+                    <span class="badge">In Stock</span>
+                    {% endif %}
+
+                    <a href="/product/{{ product.product_id }}" class="btn product-view-btn">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p>No products found.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header admin-page-header">
+    <div class="page-title-with-icon">
+        <div class="page-title-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 5h16v4H4z"></path>
+                <path d="M4 11h10v8H4z"></path>
+                <path d="M16 11h4v8h-4z"></path>
+            </svg>
+        </div>
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p class="section-text">Manage products, reviews, and database demos in one place.</p>
+        </div>
+    </div>
+</section>
+
+<section class="container admin-dashboard">
+    <div class="stats-grid admin-stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 8l8-4 8 4-8 4-8-4z"></path>
+                    <path d="M4 8v8l8 4 8-4V8"></path>
+                    <path d="M12 12v8"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>{{ total_products }}</h3>
+                <p>Total Products</p>
+                <span class="stat-note">Live from MariaDB</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 5h16v11H8l-4 4V5z"></path>
+                    <path d="M12 8l1 2 2 .3-1.5 1.5.4 2.2-1.9-1-1.9 1 .4-2.2L9 10.3l2-.3 1-2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3>{{ total_reviews }}</h3>
+                <p>Total Reviews</p>
+                <span class="stat-note">Live from MongoDB</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="feature-grid admin-action-grid">
+        <a href="/admin/products" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 6h16"></path>
+                    <path d="M4 12h16"></path>
+                    <path d="M4 18h16"></path>
+                    <path d="M8 6v12"></path>
+                </svg>
+            </div>
+            <h3>Manage Products</h3>
+            <p>View, edit, and delete product records.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/products/add" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+            </div>
+            <h3>Add Product</h3>
+            <p>Create a new product and tag categories.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/reviews" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 5h16v11H8l-4 4V5z"></path>
+                    <path d="M8 9h8"></path>
+                    <path d="M8 12h6"></path>
+                </svg>
+            </div>
+            <h3>Manage Reviews</h3>
+            <p>Filter, edit, and moderate review documents.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/sql-demo" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 7h16"></path>
+                    <path d="M4 12h10"></path>
+                    <path d="M4 17h8"></path>
+                    <path d="M16 12l4-3v6l-4-3z"></path>
+                </svg>
+            </div>
+            <h3>SQL Demo</h3>
+            <p>Showcase nested queries and joins.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/performance-demo" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M5 19V9"></path>
+                    <path d="M12 19V5"></path>
+                    <path d="M19 19v-7"></path>
+                    <path d="M3 19h18"></path>
+                </svg>
+            </div>
+            <h3>Performance Analysis</h3>
+            <p>Review index impact and query timings.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/view-index-demo" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <rect x="4" y="5" width="16" height="6"></rect>
+                    <rect x="4" y="13" width="16" height="6"></rect>
+                </svg>
+            </div>
+            <h3>View &amp; Index Demo</h3>
+            <p>Inspect SQL views and active indexes.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/trigger-demo" class="feature-card admin-action-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M13 2L4 14h6l-1 8 9-12h-6z"></path>
+                </svg>
+            </div>
+            <h3>Trigger Demo</h3>
+            <p>Audit logs from insert/update triggers.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+
+        <a href="/admin/logout" class="feature-card admin-action-card logout-card">
+            <div class="feature-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <path d="M16 17l5-5-5-5"></path>
+                    <path d="M21 12H9"></path>
+                </svg>
+            </div>
+            <h3>Logout</h3>
+            <p>End the admin session safely.</p>
+            <span class="feature-arrow">›</span>
+        </a>
+    </div>
+</section>
+
+{% endblock %}

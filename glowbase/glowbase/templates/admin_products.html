@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header">
+    <h1>Manage Products</h1>
+    <p>View and delete product records.</p>
+</section>
+
+<section class="container">
+
+    <div class="admin-actions">
+        <a href="/admin/products/add" class="btn">Add Product</a>
+        <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
+    </div>
+
+    <div class="admin-table-card">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product</th>
+                <th>Brand</th>
+                <th>Price</th>
+                <th>Rating</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <td><span class="code-pill">{{ product.product_id }}</span></td>
+                    <td><strong>{{ product.product_name }}</strong></td>
+                    <td>{{ product.brand_name }}</td>
+                    <td><span class="money-pill">${{ product.price_usd }}</span></td>
+                    <td><span class="rating-pill">{{ product.rating }} / 5</span></td>
+                    <td class="table-actions">
+                        <a href="/admin/products/edit/{{ product.product_id }}" class="btn admin-edit-btn">Edit</a>
+
+                        <a href="/admin/products/delete/{{ product.product_id }}"
+                        class="delete-link"
+                        onclick="return confirm('Are you sure you want to delete {{ product.product_name }}?');">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+</section>
+
+{% endblock %}

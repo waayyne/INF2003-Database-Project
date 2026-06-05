@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header view-index-demo-header">
+    <div class="page-title-with-icon">
+        <div class="page-title-icon green" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+                <path d="M4 6h16"></path>
+                <path d="M4 12h16"></path>
+                <path d="M4 18h16"></path>
+                <path d="M8 4v16"></path>
+            </svg>
+        </div>
+        <div>
+            <h1>View &amp; Index Demo</h1>
+            <p class="section-text">Proof of the SQL view and indexes used in the MariaDB database.</p>
+        </div>
+    </div>
+</section>
+
+<section class="container sql-demo-container view-index-demo-container">
+
+    <div class="admin-actions">
+        <a href="/admin/dashboard" class="secondary-link">&larr; Back to Dashboard</a>
+        <a href="/admin/products" class="secondary-link">Back to Products</a>
+        <a href="/admin/performance-demo" class="secondary-link">Performance Analysis</a>
+    </div>
+
+    <div class="sql-split-layout">
+        <aside class="sql-demo-sidebar">
+            <div class="sql-demo-nav">
+                <h3>Database Features</h3>
+                <a class="sql-demo-link" href="#sql-view">SQL View</a>
+                <a class="sql-demo-link" href="#view-results">View Results</a>
+                <a class="sql-demo-link" href="#sql-indexes">SQL Indexes</a>
+                <a class="sql-demo-link" href="#index-results">Index Results</a>
+            </div>
+        </aside>
+
+        <div class="sql-demo-content">
+            <article id="sql-view" class="dashboard-card sql-demo-card view-index-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill view-pill">SQL View</span>
+                        <h2>product_summary_view</h2>
+                        <p>This virtual table combines product and brand information for repeated product queries.</p>
+                    </div>
+                    <span class="performance-index-pill">products + brands</span>
+                </div>
+
+                <div class="sql-demo-query-grid">
+                    <div class="sql-demo-panel">
+                        <h3>View Definition</h3>
+                        <pre>CREATE VIEW product_summary_view AS
+SELECT
+    p.product_id,
+    p.product_name,
+    b.brand_name,
+    p.price_usd,
+    p.rating,
+    p.reviews,
+    p.loves_count,
+    p.out_of_stock
+FROM products p, brands b
+WHERE p.brand_id = b.brand_id;</pre>
+                    </div>
+                    <div class="sql-demo-panel view-index-note">
+                        <h3>Why It Helps</h3>
+                        <p>Instead of rewriting the same join repeatedly, the view gives the admin pages a reusable product summary shape.</p>
+                        <div class="view-index-mini-grid">
+                            <span>Reusable query</span>
+                            <span>Cleaner reports</span>
+                            <span>Less repeated SQL</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article id="view-results" class="dashboard-card sql-demo-card view-index-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill">View Output</span>
+                        <h2>Sample Rows from product_summary_view</h2>
+                        <p>Live results returned from the SQL view.</p>
+                    </div>
+                </div>
+
+                <div class="admin-table-card performance-table-card">
+                    <table class="admin-table performance-table">
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Price USD</th>
+                                <th>Rating</th>
+                                <th>Reviews</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for product in view_results %}
+                            <tr>
+                                <td><span class="code-pill">{{ product.product_id }}</span></td>
+                                <td>{{ product.product_name }}</td>
+                                <td>{{ product.brand_name }}</td>
+                                <td><span class="money-pill">${{ product.price_usd }}</span></td>
+                                <td><span class="rating-pill">{{ product.rating }}</span></td>
+                                <td>{{ product.reviews }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6">No view results found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article id="sql-indexes" class="dashboard-card sql-demo-card view-index-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill performance-pill">SQL Indexes</span>
+                        <h2>Products Table Indexes</h2>
+                        <p>Indexes are created on frequently searched, filtered, and joined columns.</p>
+                    </div>
+                    <span class="performance-index-pill">query speed</span>
+                </div>
+
+                <div class="sql-demo-query-grid">
+                    <div class="sql-demo-panel">
+                        <h3>Index Commands</h3>
+                        <pre>CREATE INDEX idx_products_product_name ON products(product_name);
+CREATE INDEX idx_products_brand_id ON products(brand_id);
+CREATE INDEX idx_products_rating ON products(rating);
+CREATE INDEX idx_products_price ON products(price_usd);</pre>
+                    </div>
+                    <div class="sql-demo-panel view-index-note">
+                        <h3>Where They Matter</h3>
+                        <ul class="performance-help-list">
+                            <li>Product name search</li>
+                            <li>Brand joins</li>
+                            <li>Rating filters and sorting</li>
+                            <li>Price range filters</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <article id="index-results" class="dashboard-card sql-demo-card view-index-card">
+                <div class="sql-demo-heading">
+                    <div>
+                        <span class="sql-demo-pill">Index Output</span>
+                        <h2>SHOW INDEX Results</h2>
+                        <p>Live MariaDB metadata for indexes currently on the products table.</p>
+                    </div>
+                </div>
+
+                <div class="admin-table-card performance-table-card">
+                    <table class="admin-table performance-table">
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Index Name</th>
+                                <th>Column</th>
+                                <th>Non Unique</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for index in index_results %}
+                            <tr>
+                                <td>{{ index.Table }}</td>
+                                <td><span class="code-pill">{{ index.Key_name }}</span></td>
+                                <td>{{ index.Column_name }}</td>
+                                <td>
+                                    {% if index.Non_unique == 0 %}
+                                    <span class="status-pill yes">0</span>
+                                    {% else %}
+                                    <span class="status-pill">1</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4">No indexes found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}

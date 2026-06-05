@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header reviews-page-header">
+    <h1>Product Reviews</h1>
+    <p>View customer review text, ratings, recommendation status, and profile details.</p>
+</section>
+
+<section class="container">
+
+    <form method="GET" action="/reviews" class="filter-box">
+        <input type="text" name="search" placeholder="Search product or review..." value="{{ search }}">
+
+        <select name="rating">
+            <option value="">All Ratings</option>
+            <option value="5-5" {% if selected_rating == "5-5" %}selected{% endif %}>5 Stars</option>
+            <option value="4-4.99" {% if selected_rating == "4-4.99" %}selected{% endif %}>4 - 4.99 Stars</option>
+            <option value="3-3.99" {% if selected_rating == "3-3.99" %}selected{% endif %}>3 - 3.99 Stars</option>
+            <option value="0-2.99" {% if selected_rating == "0-2.99" %}selected{% endif %}>Below 3 Stars</option>
+        </select>
+
+        <select name="recommended">
+            <option value="">All Recommendations</option>
+            <option value="1" {% if selected_recommended == "1" %}selected{% endif %}>Recommended</option>
+            <option value="0" {% if selected_recommended == "0" %}selected{% endif %}>Not Recommended</option>
+        </select>
+
+        <button type="submit">Filter</button>
+        <a href="/reviews" class="secondary-link">Reset</a>
+    </form>
+
+    <p class="result-count">Showing up to 100 reviews</p>
+
+    <div class="review-list reviews-grid">
+        {% for review in reviews %}
+            <div class="review-card">
+                <aside class="review-person">
+                    <div class="review-avatar">
+                        RV
+                    </div>
+                    <p>Reviewer</p>
+                    <span>{{ review.submission_time or "Date unknown" }}</span>
+                </aside>
+
+                <div class="review-content">
+                    <div class="review-topline">
+                        <div>
+                            <h3>{{ review.review_title or "Untitled review" }}</h3>
+                            <p class="review-meta">
+                                {{ review.product_name }} &middot; {{ review.brand_name }}
+                            </p>
+                        </div>
+
+                        <div class="review-rating">
+                            {% for star in range(1, 6) %}
+                                {% if review.rating|float >= star %}
+                                <span class="filled">&#9733;</span>
+                                {% else %}
+                                <span>&#9733;</span>
+                                {% endif %}
+                            {% endfor %}
+                            <strong>{{ review.rating }}/5</strong>
+                        </div>
+                    </div>
+
+                    <p class="review-text">{{ review.review_text }}</p>
+
+                    <div class="review-profile-grid">
+                        <span><strong>Recommended:</strong>
+                            {% if review.is_recommended == 1 %}
+                            <em class="profile-pill yes">Yes</em>
+                            {% elif review.is_recommended == 0 %}
+                            <em class="profile-pill no">No</em>
+                            {% else %}
+                            <em class="profile-pill">Unknown</em>
+                            {% endif %}
+                        </span>
+                        <span><strong>Skin Type:</strong> <em class="profile-pill">{{ review.skin_type or "Unknown" }}</em></span>
+                        <span><strong>Skin Tone:</strong> <em class="profile-pill">{{ review.skin_tone or "Unknown" }}</em></span>
+                        <span><strong>Eye Color:</strong> <em class="profile-pill">{{ review.eye_color or "Unknown" }}</em></span>
+                        <span><strong>Hair Color:</strong> <em class="profile-pill">{{ review.hair_color or "Unknown" }}</em></span>
+                    </div>
+
+                    <div class="review-footer-row">
+                        <div class="review-helpfulness">
+                            <span>&#9825; {{ review.total_pos_feedback_count or 0 }}</span>
+                            <span>&#9826; {{ review.total_neg_feedback_count or 0 }}</span>
+                            {% if review.helpfulness %}
+                            <strong>{{ (review.helpfulness * 100)|round|int }}% Helpful</strong>
+                            {% else %}
+                            <strong>Helpfulness unavailable</strong>
+                            {% endif %}
+                        </div>
+
+                        {% if review.chemicals %}
+                        <div class="review-chemicals">
+                            {% for chem in review.chemicals[:4] %}
+                            <a href="/chemicals/{{ chem|urlencode }}" class="badge">{{ chem }}</a>
+                            {% endfor %}
+                            {% if review.chemicals|length > 4 %}
+                            <span class="badge">+{{ review.chemicals|length - 4 }}</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+            </div>
+        {% else %}
+            <p>No reviews found.</p>
+        {% endfor %}
+    </div>
+
+</section>
+
+{% endblock %}
