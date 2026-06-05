@@ -307,6 +307,66 @@ LIMIT 20;
 </div>
 
 
+
+    <br>
+
+    <div class="dashboard-card">
+        <h2>Many-to-Many Query: Products Grouped by Category</h2>
+
+        <p>
+            This query demonstrates the many-to-many relationship between products and categories
+            via the <strong>product_categories</strong> junction table. It uses a nested subquery
+            to filter down to only categories that have more than 5 products assigned.
+        </p>
+
+        <pre>
+SELECT p.product_id, p.product_name, b.brand_name,
+       c.secondary_category, c.tertiary_category, p.rating
+FROM products p
+JOIN brands b ON p.brand_id = b.brand_id
+JOIN product_categories pc ON p.product_id = pc.product_id
+JOIN categories c ON pc.category_id = c.category_id
+WHERE pc.category_id IN (
+    SELECT category_id
+    FROM product_categories
+    GROUP BY category_id
+    HAVING COUNT(*) > 5
+)
+ORDER BY c.secondary_category, p.rating DESC
+LIMIT 20;
+        </pre>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Subcategory</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in category_products %}
+                    <tr>
+                        <td>{{ row.product_id }}</td>
+                        <td>{{ row.product_name }}</td>
+                        <td>{{ row.brand_name }}</td>
+                        <td>{{ row.secondary_category }}</td>
+                        <td>{{ row.tertiary_category }}</td>
+                        <td>{{ row.rating }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">No results found. Make sure product_categories is populated.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </section>
 
 {% endblock %}

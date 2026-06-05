@@ -1261,6 +1261,27 @@ def sql_demo():
     """)
     brands_with_out_of_stock_products = cursor.fetchall()
 
+    # Many-to-Many Query:
+    # Products and their categories via the product_categories junction table,
+    # filtered to only categories that have more than 5 products assigned.
+    cursor.execute("""
+        SELECT p.product_id, p.product_name, b.brand_name,
+               c.secondary_category, c.tertiary_category, p.rating
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        JOIN product_categories pc ON p.product_id = pc.product_id
+        JOIN categories c ON pc.category_id = c.category_id
+        WHERE pc.category_id IN (
+            SELECT category_id
+            FROM product_categories
+            GROUP BY category_id
+            HAVING COUNT(*) > 5
+        )
+        ORDER BY c.secondary_category, p.rating DESC
+        LIMIT 20
+    """)
+    category_products = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
@@ -1271,7 +1292,8 @@ def sql_demo():
         above_average_price_products=above_average_price_products,
         high_rating_brands=high_rating_brands,
         highest_rating_products=highest_rating_products,
-        brands_with_out_of_stock_products=brands_with_out_of_stock_products
+        brands_with_out_of_stock_products=brands_with_out_of_stock_products,
+        category_products=category_products
     )
 
 
