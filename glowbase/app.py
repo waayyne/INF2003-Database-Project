@@ -1700,7 +1700,7 @@ def chemicals():
     return render_template("chemicals.html", chemicals=chemical_stats)
 
 
-@app.route("/chemicals/<chemical_name>")
+@app.route("/chemicals/<path:chemical_name>")
 def chemical_products(chemical_name):
     reviews_collection = get_mongo_collection()
 
