@@ -195,7 +195,7 @@
                     <div class="review-avatar">
                         RV
                     </div>
-                    <p>Reviewer</p>
+                    <p>{{ review.author_id if review.author_id else "Reviewer" }}</p>
                     <span>{{ review.submission_time or "Date unknown" }}</span>
                 </aside>
 
