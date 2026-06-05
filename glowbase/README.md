@@ -361,3 +361,6 @@ Before presenting, verify these pages work and have data:
 - If the trigger demo page is empty, add a product first to fire the insert trigger
 - If MongoDB reviews do not appear, check that MongoDB is running and the collection was seeded
 - If MariaDB pages fail on startup, check that your MariaDB user has CREATE, ALTER, INDEX, and TRIGGER permissions
+
+
+fiona test
