@@ -4,7 +4,7 @@
 
 <section class="page-header">
     <h1>Manage Products</h1>
-    <p>View and delete product records.</p>
+    <p>View, filter, edit, and delete product records.</p>
 </section>
 
 <section class="container">
@@ -14,40 +14,168 @@
         <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
     </div>
 
-    <div class="admin-table-card">
-    <table class="admin-table">
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Product</th>
-                <th>Brand</th>
-                <th>Price</th>
-                <th>Rating</th>
-                <th>Action</th>
-            </tr>
-        </thead>
+    <form method="GET" action="/admin/products" class="filter-box">
+        <input type="text" name="search" placeholder="Search product name..." value="{{ search }}">
 
-        <tbody>
-            {% for product in products %}
+        <select name="brand">
+            <option value="">All Brands</option>
+            {% for brand in brands %}
+            <option value="{{ brand }}" {% if brand == selected_brand %}selected{% endif %}>
+                {{ brand }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                {{ category }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="rating">
+            <option value="">All Ratings</option>
+            <option value="4.5-5" {% if selected_rating == "4.5-5" %}selected{% endif %}>
+                4.5 - 5.0
+            </option>
+            <option value="4.0-4.49" {% if selected_rating == "4.0-4.49" %}selected{% endif %}>
+                4.0 - 4.49
+            </option>
+            <option value="3.5-3.99" {% if selected_rating == "3.5-3.99" %}selected{% endif %}>
+                3.5 - 3.99
+            </option>
+            <option value="0-3.49" {% if selected_rating == "0-3.49" %}selected{% endif %}>
+                Below 3.5
+            </option>
+        </select>
+
+        <select name="price">
+            <option value="">All Prices</option>
+            <option value="0-25" {% if selected_price == "0-25" %}selected{% endif %}>
+                $0 - $25
+            </option>
+            <option value="25-50" {% if selected_price == "25-50" %}selected{% endif %}>
+                $25 - $50
+            </option>
+            <option value="50-100" {% if selected_price == "50-100" %}selected{% endif %}>
+                $50 - $100
+            </option>
+            <option value="100-9999" {% if selected_price == "100-9999" %}selected{% endif %}>
+                $100+
+            </option>
+        </select>
+
+        <button type="submit">Filter Products</button>
+        <a href="/admin/products" class="secondary-link">Reset</a>
+
+        <button type="button" class="query-drawer-button" data-query-target="admin-products-query-drawer">
+            View SQL Query
+        </button>
+    </form>
+
+    <div id="admin-products-query-drawer" class="query-drawer" aria-hidden="true">
+        <div class="query-drawer-backdrop" data-query-close></div>
+
+        <aside class="query-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="admin-products-query-title">
+            <div class="query-drawer-header">
+                <div>
+                    <h2 id="admin-products-query-title">SQL Statement Used</h2>
+                    <p>
+                        This is the MariaDB query built from the current admin product filters.
+                        It can be copied and tested directly in MariaDB.
+                    </p>
+                </div>
+
+                <button type="button" class="query-drawer-close" data-query-close aria-label="Close query drawer">
+                    &times;
+                </button>
+            </div>
+
+            <div class="query-display-card">
+                <h3>Pasteable MariaDB SQL Statement</h3>
+                <pre>{{ sql_statement_used }}</pre>
+            </div>
+        </aside>
+    </div>
+
+    <p class="result-count">Showing {{ products|length }} product(s), up to 100 results.</p>
+
+    <div class="admin-table-card">
+        <table class="admin-table">
+            <thead>
                 <tr>
-                    <td><span class="code-pill">{{ product.product_id }}</span></td>
-                    <td><strong>{{ product.product_name }}</strong></td>
+                    <th>Product ID</th>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Rating</th>
+                    <th>Reviews</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>
+                        <span class="code-pill">{{ product.product_id }}</span>
+                    </td>
+
+                    <td>
+                        <strong>{{ product.product_name }}</strong>
+                    </td>
+
                     <td>{{ product.brand_name }}</td>
-                    <td><span class="money-pill">${{ product.price_usd }}</span></td>
-                    <td><span class="rating-pill">{{ product.rating }} / 5</span></td>
+
+                    <td>
+                        {% if product.categories %}
+                            {{ product.categories }}
+                        {% else %}
+                            Not assigned
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <span class="money-pill">${{ product.price_usd }}</span>
+                    </td>
+
+                    <td>
+                        <span class="rating-pill">{{ product.rating }} / 5</span>
+                    </td>
+
+                    <td>{{ product.reviews }}</td>
+
+                    <td>
+                        {% if product.out_of_stock == 1 %}
+                            <span class="status-pill no">Out</span>
+                        {% else %}
+                            <span class="status-pill yes">In</span>
+                        {% endif %}
+                    </td>
+
                     <td class="table-actions">
-                        <a href="/admin/products/edit/{{ product.product_id }}" class="btn admin-edit-btn">Edit</a>
+                        <a href="/admin/products/edit/{{ product.product_id }}" class="btn admin-edit-btn">
+                            Edit
+                        </a>
 
                         <a href="/admin/products/delete/{{ product.product_id }}"
-                        class="delete-link"
-                        onclick="return confirm('Are you sure you want to delete {{ product.product_name }}?');">
+                           class="delete-link"
+                           onclick="return confirm('Are you sure you want to delete {{ product.product_name }}?');">
                             Delete
                         </a>
                     </td>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                {% else %}
+                <tr>
+                    <td colspan="9">No products found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
 </section>

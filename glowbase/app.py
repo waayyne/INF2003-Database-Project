@@ -854,29 +854,121 @@ def admin_products():
     if not is_admin_logged_in():
         return redirect("/admin/login")
 
+    search = request.args.get("search", "")
+    brand = request.args.get("brand", "")
+    category = request.args.get("category", "")
+    rating = request.args.get("rating", "")
+    price = request.args.get("price", "")
+
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("""
+    params = []
+
+    query = """
         SELECT
             p.product_id,
             p.product_name,
             b.brand_name,
             p.price_usd,
-            p.rating
-        FROM products p, brands b
-        WHERE p.brand_id = b.brand_id
-        ORDER BY p.product_id
-        LIMIT 100
-    """)
+            p.rating,
+            p.reviews,
+            p.out_of_stock,
+            GROUP_CONCAT(DISTINCT c.primary_category SEPARATOR ', ') AS categories
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+        LEFT JOIN categories c ON pc.category_id = c.category_id
+    """
+
+    where_clauses = []
+
+    if search:
+        where_clauses.append("p.product_name LIKE %s")
+        params.append("%" + search + "%")
+
+    if brand:
+        where_clauses.append("b.brand_name = %s")
+        params.append(brand)
+
+    if category:
+        where_clauses.append("""
+            (
+                c.primary_category = %s
+                OR c.secondary_category = %s
+                OR c.tertiary_category = %s
+            )
+        """)
+        params.extend([category, category, category])
+
+    if rating:
+        min_rating, max_rating = rating.split("-")
+        where_clauses.append("p.rating >= %s AND p.rating <= %s")
+        params.append(float(min_rating))
+        params.append(float(max_rating))
+
+    if price:
+        min_price, max_price = price.split("-")
+        where_clauses.append("p.price_usd >= %s AND p.price_usd <= %s")
+        params.append(float(min_price))
+        params.append(float(max_price))
+
+    if where_clauses:
+        query += " WHERE " + " AND ".join(where_clauses)
+
+    query += " GROUP BY p.product_id ORDER BY p.product_id LIMIT 100"
+
+    sql_statement_used = make_pasteable_sql(query, params)
+
+    cursor.execute(query, params)
     product_list = cursor.fetchall()
+
+    cursor.execute("SELECT DISTINCT brand_name FROM brands ORDER BY brand_name")
+    brands = [row["brand_name"] for row in cursor.fetchall()]
+
+    cursor.execute("""
+        SELECT DISTINCT category_name
+        FROM (
+            SELECT c.primary_category AS category_name
+            FROM products p
+            JOIN product_categories pc ON p.product_id = pc.product_id
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE c.primary_category IS NOT NULL AND c.primary_category != ''
+
+            UNION
+
+            SELECT c.secondary_category AS category_name
+            FROM products p
+            JOIN product_categories pc ON p.product_id = pc.product_id
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE c.secondary_category IS NOT NULL AND c.secondary_category != ''
+
+            UNION
+
+            SELECT c.tertiary_category AS category_name
+            FROM products p
+            JOIN product_categories pc ON p.product_id = pc.product_id
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE c.tertiary_category IS NOT NULL AND c.tertiary_category != ''
+        ) AS linked_categories
+        ORDER BY category_name
+    """)
+    categories = [row["category_name"] for row in cursor.fetchall()]
 
     cursor.close()
     conn.close()
 
     return render_template(
         "admin_products.html",
-        products=product_list
+        products=product_list,
+        brands=brands,
+        categories=categories,
+        search=search,
+        selected_brand=brand,
+        selected_category=category,
+        selected_rating=rating,
+        selected_price=price,
+        sql_statement_used=sql_statement_used
     )
 
 
