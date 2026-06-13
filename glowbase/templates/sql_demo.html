@@ -7,18 +7,34 @@
     <p>Nested query examples for the Database Systems project.</p>
 </section>
 
-<section class="container">
+<section class="container sql-demo-container">
+    <div class="sql-split-layout">
+        <aside class="sql-demo-sidebar">
+            <nav class="sql-demo-nav" aria-label="SQL demo queries">
+                <h3>Nested Queries</h3>
+                <a class="sql-demo-link" href="#nested-query-1">1. Above Average Rating</a>
+                <a class="sql-demo-link" href="#nested-query-2">2. Brands With 3+ Products</a>
+                <a class="sql-demo-link" href="#nested-query-3">3. Above Average Price</a>
+                <a class="sql-demo-link" href="#nested-query-4">4. Brand Avg Rating</a>
+                <a class="sql-demo-link" href="#nested-query-5">5. Highest Rated</a>
+                <a class="sql-demo-link" href="#nested-query-6">6. Out-of-Stock Brands</a>
+                <a class="sql-demo-link" href="#nested-query-7">7. Category Grouping</a>
+            </nav>
+        </aside>
 
-    <div class="dashboard-card">
-        <h2>Nested Query 1: Products Above Average Rating</h2>
+        <div class="sql-demo-content">
+            <article class="dashboard-card sql-demo-card" id="nested-query-1">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 1: Products Above Average Rating</h2>
+                        <p>This query finds products whose rating is higher than the average rating of all products.</p>
+                    </div>
+                    <span class="sql-demo-pill">MariaDB nested query</span>
+                </div>
 
-        <p>
-            This query finds products whose rating is higher than the average
-            rating of all products.
-        </p>
-
-        <pre>
-SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
 FROM products p, brands b
 WHERE p.brand_id = b.brand_id
 AND p.rating > (
@@ -26,50 +42,51 @@ AND p.rating > (
     FROM products
 )
 ORDER BY p.rating DESC
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Rating</th>
-                    <th>Price USD</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Rating</th>
+                                <th>Price USD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in above_average_products %}
+                                <tr>
+                                    <td>{{ product.product_id }}</td>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.brand_name }}</td>
+                                    <td>{{ product.rating }}</td>
+                                    <td>${{ product.price_usd }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">No results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for product in above_average_products %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.brand_name }}</td>
-                        <td>{{ product.rating }}</td>
-                        <td>${{ product.price_usd }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5">No results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="nested-query-2">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 2: Products From Brands With More Than 3 Products</h2>
+                        <p>This query finds products where the brand appears in a nested query that returns brands with more than 3 products.</p>
+                    </div>
+                    <span class="sql-demo-pill">IN subquery</span>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Nested Query 2: Products From Brands With More Than 3 Products</h2>
-
-        <p>
-            This query finds products where the brand appears in a nested query
-            that returns brands with more than 3 products.
-        </p>
-
-        <pre>
-SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
 FROM products p, brands b
 WHERE p.brand_id = b.brand_id
 AND p.brand_id IN (
@@ -79,49 +96,51 @@ AND p.brand_id IN (
     HAVING COUNT(*) > 3
 )
 ORDER BY b.brand_name, p.product_name
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Rating</th>
-                    <th>Price USD</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Rating</th>
+                                <th>Price USD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in popular_brand_products %}
+                                <tr>
+                                    <td>{{ product.product_id }}</td>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.brand_name }}</td>
+                                    <td>{{ product.rating }}</td>
+                                    <td>${{ product.price_usd }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">No results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for product in popular_brand_products %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.brand_name }}</td>
-                        <td>{{ product.rating }}</td>
-                        <td>${{ product.price_usd }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5">No results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="nested-query-3">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 3: Products Above Average Price</h2>
+                        <p>This query finds products that are more expensive than the average product price.</p>
+                    </div>
+                    <span class="sql-demo-pill">AVG comparison</span>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Nested Query 3: Products Above Average Price</h2>
-
-        <p>
-            This query finds products that are more expensive than the average product price.
-        </p>
-
-        <pre>
-SELECT p.product_id, p.product_name, b.brand_name, p.price_usd, p.rating
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT p.product_id, p.product_name, b.brand_name, p.price_usd, p.rating
 FROM products p, brands b
 WHERE p.brand_id = b.brand_id
 AND p.price_usd > (
@@ -129,49 +148,51 @@ AND p.price_usd > (
     FROM products
 )
 ORDER BY p.price_usd DESC
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Price USD</th>
-                    <th>Rating</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Price USD</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in above_average_price_products %}
+                                <tr>
+                                    <td>{{ product.product_id }}</td>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.brand_name }}</td>
+                                    <td>${{ product.price_usd }}</td>
+                                    <td>{{ product.rating }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">No results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for product in above_average_price_products %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.brand_name }}</td>
-                        <td>${{ product.price_usd }}</td>
-                        <td>{{ product.rating }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5">No results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="nested-query-4">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 4: Brands Above Overall Average Rating</h2>
+                        <p>This query finds brands whose average product rating is higher than the overall average rating.</p>
+                    </div>
+                    <span class="sql-demo-pill">HAVING subquery</span>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Nested Query 4: Brands Above Overall Average Rating</h2>
-
-        <p>
-            This query finds brands whose average product rating is higher than the overall average rating.
-        </p>
-
-        <pre>
-SELECT b.brand_name, AVG(p.rating) AS avg_rating, COUNT(*) AS total_products
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT b.brand_name, AVG(p.rating) AS avg_rating, COUNT(*) AS total_products
 FROM products p, brands b
 WHERE p.brand_id = b.brand_id
 GROUP BY b.brand_name
@@ -180,45 +201,47 @@ HAVING AVG(p.rating) > (
     FROM products
 )
 ORDER BY avg_rating DESC
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Brand</th>
-                    <th>Average Rating</th>
-                    <th>Total Products</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Average Rating</th>
+                                <th>Total Products</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for brand in high_rating_brands %}
+                                <tr>
+                                    <td>{{ brand.brand_name }}</td>
+                                    <td>{{ brand.avg_rating }}</td>
+                                    <td>{{ brand.total_products }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3">No results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for brand in high_rating_brands %}
-                    <tr>
-                        <td>{{ brand.brand_name }}</td>
-                        <td>{{ brand.avg_rating }}</td>
-                        <td>{{ brand.total_products }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="3">No results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="nested-query-5">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 5: Highest Rated Products</h2>
+                        <p>This query finds products with the highest rating in the database.</p>
+                    </div>
+                    <span class="sql-demo-pill">MAX subquery</span>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Nested Query 5: Highest Rated Products</h2>
-
-        <p>
-            This query finds products with the highest rating in the database.
-        </p>
-
-        <pre>
-SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT p.product_id, p.product_name, b.brand_name, p.rating, p.price_usd
 FROM products p, brands b
 WHERE p.brand_id = b.brand_id
 AND p.rating = (
@@ -226,49 +249,51 @@ AND p.rating = (
     FROM products
 )
 ORDER BY p.product_name
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Rating</th>
-                    <th>Price USD</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Rating</th>
+                                <th>Price USD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in highest_rating_products %}
+                                <tr>
+                                    <td>{{ product.product_id }}</td>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.brand_name }}</td>
+                                    <td>{{ product.rating }}</td>
+                                    <td>${{ product.price_usd }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">No results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for product in highest_rating_products %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.brand_name }}</td>
-                        <td>{{ product.rating }}</td>
-                        <td>${{ product.price_usd }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5">No results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="nested-query-6">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 6: Products From Brands With Out-of-Stock Products</h2>
+                        <p>This query finds products from brands that have at least one out-of-stock product.</p>
+                    </div>
+                    <span class="sql-demo-pill">Inventory filter</span>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Nested Query 6: Products From Brands With Out-of-Stock Products</h2>
-
-        <p>
-            This query finds products from brands that have at least one out-of-stock product.
-        </p>
-
-        <pre>
-SELECT p.product_id, p.product_name, b.brand_name, p.out_of_stock
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT p.product_id, p.product_name, b.brand_name, p.out_of_stock
 FROM products p, brands b
 WHERE p.brand_id = b.brand_id
 AND p.brand_id IN (
@@ -277,49 +302,49 @@ AND p.brand_id IN (
     WHERE out_of_stock = 1
 )
 ORDER BY b.brand_name, p.product_name
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Out of Stock</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Out of Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in brands_with_out_of_stock_products %}
+                                <tr>
+                                    <td>{{ product.product_id }}</td>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.brand_name }}</td>
+                                    <td>{{ product.out_of_stock }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4">No results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for product in brands_with_out_of_stock_products %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.brand_name }}</td>
-                        <td>{{ product.out_of_stock }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="4">No results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="nested-query-7">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Nested Query 7: Many-to-Many Products Grouped by Category</h2>
+                        <p>This query demonstrates the many-to-many relationship between products and categories using the product_categories junction table.</p>
+                    </div>
+                    <span class="sql-demo-pill">Junction table</span>
+                </div>
 
-    <br>
-
-    <div class="dashboard-card">
-        <h2>Nested Query 7: Many-to-Many Products Grouped by Category</h2>
-
-        <p>
-            This query demonstrates the many-to-many relationship between products and categories
-            using the <strong>product_categories</strong> junction table. The nested query filters
-            categories that have more than 5 products assigned.
-        </p>
-
-        <pre>
-SELECT p.product_id, p.product_name, b.brand_name,
+                <details class="sql-demo-code" open>
+                    <summary>SQL statement used</summary>
+                    <pre>SELECT p.product_id, p.product_name, b.brand_name,
        c.secondary_category, c.tertiary_category, p.rating
 FROM products p
 JOIN brands b ON p.brand_id = b.brand_id
@@ -332,40 +357,42 @@ WHERE pc.category_id IN (
     HAVING COUNT(*) > 5
 )
 ORDER BY c.secondary_category, p.rating DESC
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Category</th>
-                    <th>Subcategory</th>
-                    <th>Rating</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for row in category_products %}
-                    <tr>
-                        <td>{{ row.product_id }}</td>
-                        <td>{{ row.product_name }}</td>
-                        <td>{{ row.brand_name }}</td>
-                        <td>{{ row.secondary_category }}</td>
-                        <td>{{ row.tertiary_category }}</td>
-                        <td>{{ row.rating }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="6">No results found. Make sure product_categories is populated.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Category</th>
+                                <th>Subcategory</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in category_products %}
+                                <tr>
+                                    <td>{{ row.product_id }}</td>
+                                    <td>{{ row.product_name }}</td>
+                                    <td>{{ row.brand_name }}</td>
+                                    <td>{{ row.secondary_category }}</td>
+                                    <td>{{ row.tertiary_category }}</td>
+                                    <td>{{ row.rating }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6">No results found. Make sure product_categories is populated.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
     </div>
-
 </section>
 
 {% endblock %}

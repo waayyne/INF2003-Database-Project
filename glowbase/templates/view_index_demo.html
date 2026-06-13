@@ -7,25 +7,35 @@
     <p>Proof of SQL view, indexes, and performance comparison used in the MariaDB database.</p>
 </section>
 
-<section class="container">
-
+<section class="container sql-demo-container">
     <div class="admin-actions">
         <a href="/admin/dashboard" class="secondary-link">Back to Dashboard</a>
         <a href="/admin/products" class="secondary-link">Back to Products</a>
     </div>
 
-    <!-- SQL VIEW SECTION -->
-    <div class="dashboard-card">
-        <h2>SQL View: product_summary_view</h2>
+    <div class="sql-split-layout">
+        <aside class="sql-demo-sidebar">
+            <nav class="sql-demo-nav" aria-label="View and index demo sections">
+                <h3>Demo Sections</h3>
+                <a class="sql-demo-link" href="#sql-view-section">1. SQL View</a>
+                <a class="sql-demo-link" href="#index-section">2. Product Indexes</a>
+                <a class="sql-demo-link" href="#performance-section">3. EXPLAIN Comparison</a>
+            </nav>
+        </aside>
 
-        <p>
-            This view combines product and brand information into one virtual table.
-            It makes repeated product queries easier to write because the join between
-            <strong>products</strong> and <strong>brands</strong> is already stored inside the view.
-        </p>
+        <div class="sql-demo-content">
+            <article class="dashboard-card sql-demo-card" id="sql-view-section">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>SQL View: product_summary_view</h2>
+                        <p>This virtual table combines product and brand details so repeated product queries can use one cleaner source.</p>
+                    </div>
+                    <span class="sql-demo-pill">MariaDB view</span>
+                </div>
 
-        <pre>
-CREATE VIEW product_summary_view AS
+                <details class="sql-demo-code" open>
+                    <summary>View creation statement</summary>
+                    <pre>CREATE VIEW product_summary_view AS
 SELECT
     p.product_id,
     p.product_name,
@@ -36,204 +46,192 @@ SELECT
     p.loves_count,
     p.out_of_stock
 FROM products p, brands b
-WHERE p.brand_id = b.brand_id;
-        </pre>
+WHERE p.brand_id = b.brand_id;</pre>
+                </details>
 
-        <h3>View Query Result</h3>
-
-        <pre>
-SELECT product_id, product_name, brand_name, price_usd, rating, reviews
+                <details class="sql-demo-code" open>
+                    <summary>Query using the view</summary>
+                    <pre>SELECT product_id, product_name, brand_name, price_usd, rating, reviews
 FROM product_summary_view
 WHERE rating >= 4.5
 ORDER BY rating DESC
-LIMIT 20;
-        </pre>
+LIMIT 20;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Product</th>
-                    <th>Brand</th>
-                    <th>Price USD</th>
-                    <th>Rating</th>
-                    <th>Reviews</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product ID</th>
+                                <th>Product</th>
+                                <th>Brand</th>
+                                <th>Price USD</th>
+                                <th>Rating</th>
+                                <th>Reviews</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in view_results %}
+                                <tr>
+                                    <td>{{ product.product_id }}</td>
+                                    <td>{{ product.product_name }}</td>
+                                    <td>{{ product.brand_name }}</td>
+                                    <td>${{ product.price_usd }}</td>
+                                    <td>{{ product.rating }}</td>
+                                    <td>{{ product.reviews }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6">No view results found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-            <tbody>
-                {% for product in view_results %}
-                    <tr>
-                        <td>{{ product.product_id }}</td>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.brand_name }}</td>
-                        <td>${{ product.price_usd }}</td>
-                        <td>{{ product.rating }}</td>
-                        <td>{{ product.reviews }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="6">No view results found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            <article class="dashboard-card sql-demo-card" id="index-section">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>SQL Indexes on Products Table</h2>
+                        <p>Indexes are created on frequently searched, filtered, and joined columns to improve product query performance.</p>
+                    </div>
+                    <span class="sql-demo-pill">Index proof</span>
+                </div>
 
-    <br>
-
-    <!-- INDEX SECTION -->
-    <div class="dashboard-card">
-        <h2>SQL Indexes on Products Table</h2>
-
-        <p>
-            Indexes are created on frequently searched, filtered, and joined columns
-            to improve query performance. In this project, indexes help product searches,
-            brand joins, rating filters, and price filters.
-        </p>
-
-        <pre>
-CREATE INDEX idx_products_product_name ON products(product_name);
+                <details class="sql-demo-code" open>
+                    <summary>Index statements used</summary>
+                    <pre>CREATE INDEX idx_products_product_name ON products(product_name);
 CREATE INDEX idx_products_brand_id ON products(brand_id);
 CREATE INDEX idx_products_rating ON products(rating);
-CREATE INDEX idx_products_price ON products(price_usd);
-        </pre>
+CREATE INDEX idx_products_price ON products(price_usd);</pre>
+                </details>
 
-        <h3>Indexes Existing in MariaDB</h3>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Index Name</th>
+                                <th>Column</th>
+                                <th>Non Unique</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index in index_results %}
+                                <tr>
+                                    <td>{{ index.Table }}</td>
+                                    <td>{{ index.Key_name }}</td>
+                                    <td>{{ index.Column_name }}</td>
+                                    <td>{{ index.Non_unique }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4">No indexes found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Table</th>
-                    <th>Index Name</th>
-                    <th>Column</th>
-                    <th>Non Unique</th>
-                </tr>
-            </thead>
+            <article class="dashboard-card sql-demo-card" id="performance-section">
+                <div class="sql-demo-heading">
+                    <div>
+                        <h2>Index Performance: EXPLAIN Comparison</h2>
+                        <p>The same rating query is compared with and without the rating index. The rows column shows how much work MariaDB expects to scan.</p>
+                    </div>
+                    <span class="sql-demo-pill">Performance comparison</span>
+                </div>
 
-            <tbody>
-                {% for index in index_results %}
-                    <tr>
-                        <td>{{ index.Table }}</td>
-                        <td>{{ index.Key_name }}</td>
-                        <td>{{ index.Column_name }}</td>
-                        <td>{{ index.Non_unique }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="4">No indexes found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <br>
-
-    <!-- EXPLAIN PERFORMANCE SECTION -->
-    <div class="dashboard-card">
-        <h2>Index Performance: EXPLAIN Comparison</h2>
-
-        <p>
-            This section compares the same rating query twice. The first query forces
-            MariaDB to ignore the rating index, while the second query allows MariaDB
-            to use the <strong>idx_products_rating</strong> index normally.
-        </p>
-
-        <p>
-            The important column is <strong>rows</strong>. It shows how many rows MariaDB
-            estimates it needs to scan. A lower number usually means the index is helping.
-        </p>
-
-        <h3>Without Index: IGNORE INDEX</h3>
-
-        <pre>
-EXPLAIN SELECT product_id, product_name, rating, price_usd
+                <details class="sql-demo-code" open>
+                    <summary>Without index: IGNORE INDEX</summary>
+                    <pre>EXPLAIN SELECT product_id, product_name, rating, price_usd
 FROM products IGNORE INDEX (idx_products_rating)
 WHERE rating >= 4.5
-ORDER BY rating DESC;
-        </pre>
+ORDER BY rating DESC;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Select Type</th>
-                    <th>Table</th>
-                    <th>Type</th>
-                    <th>Possible Keys</th>
-                    <th>Key Used</th>
-                    <th>Rows Scanned</th>
-                    <th>Extra</th>
-                </tr>
-            </thead>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Select Type</th>
+                                <th>Table</th>
+                                <th>Type</th>
+                                <th>Possible Keys</th>
+                                <th>Key Used</th>
+                                <th>Rows Scanned</th>
+                                <th>Extra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in explain_no_index %}
+                                <tr>
+                                    <td>{{ row.id }}</td>
+                                    <td>{{ row.select_type }}</td>
+                                    <td>{{ row.table }}</td>
+                                    <td>{{ row.type }}</td>
+                                    <td>{{ row.possible_keys }}</td>
+                                    <td>{{ row.key }}</td>
+                                    <td><strong>{{ row.rows }}</strong></td>
+                                    <td>{{ row.Extra }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8">No EXPLAIN result found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
-            <tbody>
-                {% for row in explain_no_index %}
-                    <tr>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.select_type }}</td>
-                        <td>{{ row.table }}</td>
-                        <td>{{ row.type }}</td>
-                        <td>{{ row.possible_keys }}</td>
-                        <td>{{ row.key }}</td>
-                        <td><strong>{{ row.rows }}</strong></td>
-                        <td>{{ row.Extra }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="8">No EXPLAIN result found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <br>
-
-        <h3>With Index: idx_products_rating</h3>
-
-        <pre>
-EXPLAIN SELECT product_id, product_name, rating, price_usd
+                <details class="sql-demo-code" open>
+                    <summary>With index: idx_products_rating</summary>
+                    <pre>EXPLAIN SELECT product_id, product_name, rating, price_usd
 FROM products
 WHERE rating >= 4.5
-ORDER BY rating DESC;
-        </pre>
+ORDER BY rating DESC;</pre>
+                </details>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Select Type</th>
-                    <th>Table</th>
-                    <th>Type</th>
-                    <th>Possible Keys</th>
-                    <th>Key Used</th>
-                    <th>Rows Scanned</th>
-                    <th>Extra</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for row in explain_with_index %}
-                    <tr>
-                        <td>{{ row.id }}</td>
-                        <td>{{ row.select_type }}</td>
-                        <td>{{ row.table }}</td>
-                        <td>{{ row.type }}</td>
-                        <td>{{ row.possible_keys }}</td>
-                        <td>{{ row.key }}</td>
-                        <td><strong>{{ row.rows }}</strong></td>
-                        <td>{{ row.Extra }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="8">No EXPLAIN result found.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <div class="sql-demo-panel">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Select Type</th>
+                                <th>Table</th>
+                                <th>Type</th>
+                                <th>Possible Keys</th>
+                                <th>Key Used</th>
+                                <th>Rows Scanned</th>
+                                <th>Extra</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in explain_with_index %}
+                                <tr>
+                                    <td>{{ row.id }}</td>
+                                    <td>{{ row.select_type }}</td>
+                                    <td>{{ row.table }}</td>
+                                    <td>{{ row.type }}</td>
+                                    <td>{{ row.possible_keys }}</td>
+                                    <td>{{ row.key }}</td>
+                                    <td><strong>{{ row.rows }}</strong></td>
+                                    <td>{{ row.Extra }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8">No EXPLAIN result found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </div>
     </div>
-
 </section>
 
 {% endblock %}

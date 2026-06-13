@@ -1915,6 +1915,7 @@ button:hover {
     border: 1px solid #ece5e1;
     border-radius: 12px;
     padding: 16px;
+    overflow-x: auto;
 }
 
 .sql-demo-panel .admin-table-card {
@@ -2477,6 +2478,14 @@ footer {
 
     .sql-demo-sidebar {
         position: static;
+    }
+
+    .sql-split-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sql-demo-nav {
+        grid-template-columns: 1fr;
     }
 }
 
