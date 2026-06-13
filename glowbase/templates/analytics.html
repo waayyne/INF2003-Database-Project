@@ -7,13 +7,15 @@
 <section class="page-header analytics-page-header">
     <div>
         <h1>Analytics Dashboard</h1>
-        <p>View product and review analytics from the dataset.</p>
+        <p>View product and review analytics from MariaDB and MongoDB.</p>
     </div>
 </section>
 
 <section class="container analytics-container">
 
+    <!-- KPI CARDS -->
     <div class="analytics-kpi-grid">
+
         <div class="analytics-kpi-card">
             <div class="analytics-kpi-icon basket" aria-hidden="true">
                 <svg viewBox="0 0 24 24">
@@ -69,14 +71,78 @@
                 <span>MongoDB positive reviews</span>
             </div>
         </div>
+
     </div>
 
+    <!-- GRAPH SECTION -->
+    <div class="analytics-graph-grid">
+
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Reviews by Rating</h2>
+                <span>MongoDB Chart</span>
+            </div>
+
+            <p>This graph is generated from MongoDB review rating data.</p>
+
+            <img 
+                src="{{ url_for('static', filename='charts/' ~ reviews_by_rating_chart) }}?v={{ chart_version }}" 
+                alt="Reviews by Rating Chart"
+                class="analytics-chart-img"
+            >
+
+            <div class="query-box">
+                <h3>MongoDB Aggregation Used</h3>
+                <pre>{{ reviews_by_rating_pipeline }}</pre>
+            </div>
+        </div>
+
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Top 10 Brands by Product Count</h2>
+                <span>MariaDB Chart</span>
+            </div>
+
+            <p>This graph is generated from a MariaDB SQL query.</p>
+
+            <img 
+                src="{{ url_for('static', filename='charts/' ~ top_brands_chart) }}?v={{ chart_version }}" 
+                alt="Top Brands Chart"
+                class="analytics-chart-img"
+            >
+
+            <div class="query-box">
+                <h3>SQL Statement Used</h3>
+                <pre>{{ top_brands_sql }}</pre>
+            </div>
+        </div>
+
+        <div class="dashboard-card analytics-card">
+            <div class="analytics-card-header">
+                <h2>Recommended vs Not Recommended</h2>
+                <span>MongoDB Chart</span>
+            </div>
+
+            <p>This graph is generated from MongoDB recommendation status data.</p>
+
+            <img 
+                src="{{ url_for('static', filename='charts/' ~ recommendation_chart) }}?v={{ chart_version }}" 
+                alt="Recommended vs Not Recommended Chart"
+                class="analytics-chart-img"
+            >
+        </div>
+
+    </div>
+
+    <!-- TABLE / ANALYTICS SECTION -->
     <div class="analytics-grid">
+
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
                 <h2>Top Rated Products</h2>
                 <span>Top 10</span>
             </div>
+
             <table class="analytics-table">
                 <thead>
                     <tr>
@@ -94,6 +160,10 @@
                         <td>{{ product.brand_name }}</td>
                         <td><strong>{{ product.rating }}</strong> <span class="mini-star">&#9733;</span></td>
                     </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No product data available.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -104,6 +174,7 @@
                 <h2>Most Loved Products</h2>
                 <span>Top 10</span>
             </div>
+
             <table class="analytics-table">
                 <thead>
                     <tr>
@@ -120,9 +191,15 @@
                         <td>{{ loop.index }}</td>
                         <td>{{ product.product_name }}</td>
                         <td>
-                            <div class="meter"><span style="width: {{ (product.loves_count / max_loves * 100)|round|int }}%"></span></div>
+                            <div class="meter">
+                                <span style="width: {{ (product.loves_count / max_loves * 100)|round|int }}%"></span>
+                            </div>
                         </td>
                         <td>{{ product.loves_count }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No loved product data available.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -134,6 +211,7 @@
                 <h2>Brand Performance</h2>
                 <span>By average rating</span>
             </div>
+
             <table class="analytics-table">
                 <thead>
                     <tr>
@@ -151,6 +229,10 @@
                         <td><strong>{{ brand.avg_rating }}</strong> <span class="mini-star">&#9733;</span></td>
                         <td>{{ brand.total_products }}</td>
                     </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No brand performance data available.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -161,6 +243,7 @@
                 <h2>Top Chemicals in Product Reviews</h2>
                 <span>MongoDB mentions</span>
             </div>
+
             <div class="analytics-chemical-list">
                 {% for chem in top_chemicals[:12] %}
                 <a href="/products?chemical={{ chem._id|urlencode }}" class="analytics-chemical-row">
@@ -178,6 +261,7 @@
                 <h2>Rating Distribution</h2>
                 <span>{{ total_reviews_count }} reviews</span>
             </div>
+
             <div class="rating-bars">
                 {% set max_rating_count = rating_distribution|max(attribute='count') %}
                 {% for rating in rating_distribution %}
@@ -188,6 +272,8 @@
                     </div>
                     <strong>{{ rating.count }}</strong>
                 </div>
+                {% else %}
+                <p>No rating data available.</p>
                 {% endfor %}
             </div>
         </div>
@@ -197,18 +283,19 @@
                 <h2>Price Statistics</h2>
                 <span>MariaDB products</span>
             </div>
+
             <div class="price-stat-grid">
                 <div>
                     <span>Min Price</span>
-                    <strong>${{ "%.2f"|format(price_stats.min_price) }}</strong>
+                    <strong>${{ "%.2f"|format(price_stats.min_price or 0) }}</strong>
                 </div>
                 <div>
                     <span>Max Price</span>
-                    <strong>${{ "%.2f"|format(price_stats.max_price) }}</strong>
+                    <strong>${{ "%.2f"|format(price_stats.max_price or 0) }}</strong>
                 </div>
                 <div>
                     <span>Avg Price</span>
-                    <strong>${{ "%.2f"|format(price_stats.avg_price) }}</strong>
+                    <strong>${{ "%.2f"|format(price_stats.avg_price or 0) }}</strong>
                 </div>
                 <div>
                     <span>Total Products</span>
@@ -216,6 +303,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <div class="analytics-footer-note">

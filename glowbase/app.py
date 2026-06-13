@@ -221,7 +221,7 @@ def get_reviews_by_product_id(product_id):
 
 
 def save_bar_chart(file_path, labels, values, title, x_label, y_label, color):
-    figure, axis = plt.subplots(figsize=(10, 5))
+    figure, axis = plt.subplots(figsize=(6, 3.5))
     figure.patch.set_facecolor("white")
 
     if labels and values:
@@ -628,19 +628,25 @@ def submit_review():
 
 @app.route("/analytics")
 def analytics():
+    charts_dir = Path(app.static_folder) / "charts"
+    charts_dir.mkdir(parents=True, exist_ok=True)
+
+    chart_version = datetime.now().strftime("%Y%m%d%H%M%S%f")
+
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Total products
+    # =========================
+    # MariaDB analytics
+    # =========================
+
     cursor.execute("SELECT COUNT(*) AS total_products FROM products")
     total_products = cursor.fetchone()["total_products"]
 
-    # Average rating
     cursor.execute("SELECT AVG(rating) AS avg_rating FROM products")
     avg_row = cursor.fetchone()
     avg_rating = round(float(avg_row["avg_rating"]), 2) if avg_row["avg_rating"] else 0
 
-    # Out of stock count
     cursor.execute("""
         SELECT COUNT(*) AS out_of_stock_count
         FROM products
@@ -648,7 +654,6 @@ def analytics():
     """)
     out_of_stock_count = cursor.fetchone()["out_of_stock_count"]
 
-    # Top rated products
     cursor.execute("""
         SELECT p.product_name, b.brand_name, p.rating
         FROM products p
@@ -659,7 +664,6 @@ def analytics():
     """)
     top_rated = cursor.fetchall()
 
-    # Most loved products
     cursor.execute("""
         SELECT product_name, loves_count
         FROM products
@@ -669,7 +673,6 @@ def analytics():
     """)
     most_loved = cursor.fetchall()
 
-    # Brand performance
     cursor.execute("""
         SELECT 
             b.brand_name,
@@ -684,7 +687,6 @@ def analytics():
     """)
     brand_performance = cursor.fetchall()
 
-    # Price statistics
     cursor.execute("""
         SELECT 
             MIN(price_usd) AS min_price,
@@ -696,22 +698,47 @@ def analytics():
     """)
     price_stats = cursor.fetchone()
 
+    top_brands_sql = dedent("""
+        SELECT b.brand_name, COUNT(p.product_id) AS product_count
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        GROUP BY b.brand_name
+        ORDER BY product_count DESC, b.brand_name ASC
+        LIMIT 10
+    """).strip()
+
+    cursor.execute(top_brands_sql)
+    top_brands = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
+    # =========================
+    # MongoDB analytics
+    # =========================
+
     reviews_collection = get_mongo_collection()
 
+    total_reviews = reviews_collection.count_documents({})
     recommended_count = reviews_collection.count_documents({"is_recommended": 1})
+    not_recommended_count = reviews_collection.count_documents({"is_recommended": 0})
 
-    rating_distribution = [
-        {"stars": 5, "count": reviews_collection.count_documents({"rating": 5})},
-        {"stars": 4, "count": reviews_collection.count_documents({"rating": 4})},
-        {"stars": 3, "count": reviews_collection.count_documents({"rating": 3})},
-        {"stars": 2, "count": reviews_collection.count_documents({"rating": 2})},
-        {"stars": 1, "count": reviews_collection.count_documents({"rating": 1})}
+    rating_pipeline = [
+        {"$match": {"rating": {"$exists": True, "$ne": None}}},
+        {"$group": {"_id": "$rating", "count": {"$sum": 1}}},
+        {"$sort": {"_id": 1}}
     ]
 
-    # Top chemicals from MongoDB
+    rating_results = list(reviews_collection.aggregate(rating_pipeline))
+
+    rating_distribution = []
+    for stars in [5, 4, 3, 2, 1]:
+        count = reviews_collection.count_documents({"rating": stars})
+        rating_distribution.append({
+            "stars": stars,
+            "count": count
+        })
+
     top_chemicals = list(reviews_collection.aggregate([
         {"$match": {"chemicals": {"$exists": True, "$ne": []}}},
         {"$unwind": "$chemicals"},
@@ -725,18 +752,74 @@ def analytics():
         {"$limit": 12}
     ]))
 
+    # =========================
+    # Matplotlib charts
+    # =========================
+
+    rating_labels = [str(row["_id"]) for row in rating_results]
+    rating_values = [row["count"] for row in rating_results]
+
+    reviews_chart_name = "reviews_by_rating.png"
+    save_bar_chart(
+        charts_dir / reviews_chart_name,
+        rating_labels,
+        rating_values,
+        "Reviews by Rating",
+        "Rating",
+        "Review Count",
+        "#4a8f7f"
+    )
+
+    brand_labels = [row["brand_name"] for row in top_brands]
+    brand_values = [row["product_count"] for row in top_brands]
+
+    brands_chart_name = "top_10_brands_by_product_count.png"
+    save_bar_chart(
+        charts_dir / brands_chart_name,
+        brand_labels,
+        brand_values,
+        "Top 10 Brands by Product Count",
+        "Brand",
+        "Product Count",
+        "#c27c5a"
+    )
+
+    recommendation_labels = ["Recommended", "Not Recommended"]
+    recommendation_values = [recommended_count, not_recommended_count]
+
+    recommendation_chart_name = "recommended_vs_not_recommended.png"
+    save_bar_chart(
+        charts_dir / recommendation_chart_name,
+        recommendation_labels,
+        recommendation_values,
+        "Recommended vs Not Recommended Reviews",
+        "Recommendation Status",
+        "Review Count",
+        "#8b6fc9"
+    )
+
     return render_template(
         "analytics.html",
         total_products=total_products,
         avg_rating=avg_rating,
         out_of_stock_count=out_of_stock_count,
+        total_reviews=total_reviews,
         recommended_count=recommended_count,
+        not_recommended_count=not_recommended_count,
         top_rated=top_rated,
         most_loved=most_loved,
         brand_performance=brand_performance,
         top_chemicals=top_chemicals,
         rating_distribution=rating_distribution,
-        price_stats=price_stats
+        price_stats=price_stats,
+
+        reviews_by_rating_chart=reviews_chart_name,
+        top_brands_chart=brands_chart_name,
+        recommendation_chart=recommendation_chart_name,
+        chart_version=chart_version,
+
+        reviews_by_rating_pipeline=rating_pipeline,
+        top_brands_sql=top_brands_sql
     )
 # =========================================================
 # Admin pages
@@ -835,6 +918,7 @@ def admin_add_product():
         primary_category = request.form.get("primary_category") or ""
         price_usd = request.form.get("price_usd") or 0
         rating = request.form.get("rating") or 0
+        rating = round(float(rating), 2)
         size = request.form.get("size") or ""
         out_of_stock = request.form.get("out_of_stock") or 0
         ingredients = request.form.get("ingredients") or ""
@@ -940,6 +1024,7 @@ def admin_edit_product(product_id):
             product_name = request.form.get("product_name")
             price_usd = request.form.get("price_usd") or 0
             rating = request.form.get("rating") or 0
+            rating = round(float(rating), 2)
             size = request.form.get("size") or ""
             out_of_stock = request.form.get("out_of_stock") or 0
             
