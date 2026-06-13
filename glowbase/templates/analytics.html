@@ -79,11 +79,13 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Reviews by Rating</h2>
-                <span>MongoDB Chart</span>
+                <div class="analytics-chart-topline">
+                    <h2>Reviews by Rating</h2>
+                    <button type="button" class="query-drawer-button analytics-query-button" data-query-target="rating-query-drawer">View SQL Query</button>
+                    <span>MongoDB Chart</span>
+                </div>
+                <p class="analytics-chart-description">This graph is generated from MongoDB review rating data.</p>
             </div>
-
-            <p>This graph is generated from MongoDB review rating data.</p>
 
             <img 
                 src="{{ url_for('static', filename='charts/' ~ reviews_by_rating_chart) }}?v={{ chart_version }}" 
@@ -91,19 +93,34 @@
                 class="analytics-chart-img"
             >
 
-            <div class="query-box">
-                <h3>MongoDB Aggregation Used</h3>
-                <pre>{{ reviews_by_rating_pipeline }}</pre>
+            <div id="rating-query-drawer" class="query-drawer" aria-hidden="true">
+                <div class="query-drawer-backdrop" data-query-close></div>
+                <aside class="query-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="rating-query-title">
+                    <div class="query-drawer-header">
+                        <div>
+                            <h2 id="rating-query-title">MongoDB Aggregation Used</h2>
+                            <p>Generated for the Reviews by Rating chart.</p>
+                        </div>
+                        <button type="button" class="query-drawer-close" data-query-close aria-label="Close query drawer">&times;</button>
+                    </div>
+
+                    <div class="query-display-card">
+                        <h3>Aggregation Pipeline</h3>
+                        <pre>{{ reviews_by_rating_pipeline }}</pre>
+                    </div>
+                </aside>
             </div>
         </div>
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Top 10 Brands by Product Count</h2>
-                <span>MariaDB Chart</span>
+                <div class="analytics-chart-topline">
+                    <h2>Top 10 Brands by Product Count</h2>
+                    <button type="button" class="query-drawer-button analytics-query-button" data-query-target="brands-query-drawer">View SQL Query</button>
+                    <span>MariaDB Chart</span>
+                </div>
+                <p class="analytics-chart-description">This graph is generated from a MariaDB SQL query.</p>
             </div>
-
-            <p>This graph is generated from a MariaDB SQL query.</p>
 
             <img 
                 src="{{ url_for('static', filename='charts/' ~ top_brands_chart) }}?v={{ chart_version }}" 
@@ -111,19 +128,33 @@
                 class="analytics-chart-img"
             >
 
-            <div class="query-box">
-                <h3>SQL Statement Used</h3>
-                <pre>{{ top_brands_sql }}</pre>
+            <div id="brands-query-drawer" class="query-drawer" aria-hidden="true">
+                <div class="query-drawer-backdrop" data-query-close></div>
+                <aside class="query-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="brands-query-title">
+                    <div class="query-drawer-header">
+                        <div>
+                            <h2 id="brands-query-title">SQL Statement Used</h2>
+                            <p>Generated for the Top 10 Brands by Product Count chart.</p>
+                        </div>
+                        <button type="button" class="query-drawer-close" data-query-close aria-label="Close query drawer">&times;</button>
+                    </div>
+
+                    <div class="query-display-card">
+                        <h3>MariaDB SQL Statement</h3>
+                        <pre>{{ top_brands_sql }}</pre>
+                    </div>
+                </aside>
             </div>
         </div>
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Recommended vs Not Recommended</h2>
-                <span>MongoDB Chart</span>
+                <div class="analytics-chart-topline">
+                    <h2>Recommended vs Not Recommended</h2>
+                    <span>MongoDB Chart</span>
+                </div>
+                <p class="analytics-chart-description">This graph is generated from MongoDB recommendation status data.</p>
             </div>
-
-            <p>This graph is generated from MongoDB recommendation status data.</p>
 
             <img 
                 src="{{ url_for('static', filename='charts/' ~ recommendation_chart) }}?v={{ chart_version }}" 
@@ -139,8 +170,10 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Top Rated Products</h2>
-                <span>Top 10</span>
+                <div class="analytics-chart-topline">
+                    <h2>Top Rated Products</h2>
+                    <span>Top 10</span>
+                </div>
             </div>
 
             <table class="analytics-table">
@@ -171,8 +204,10 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Most Loved Products</h2>
-                <span>Top 10</span>
+                <div class="analytics-chart-topline">
+                    <h2>Most Loved Products</h2>
+                    <span>Top 10</span>
+                </div>
             </div>
 
             <table class="analytics-table">
@@ -208,8 +243,10 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Brand Performance</h2>
-                <span>By average rating</span>
+                <div class="analytics-chart-topline">
+                    <h2>Brand Performance</h2>
+                    <span>By average rating</span>
+                </div>
             </div>
 
             <table class="analytics-table">
@@ -240,8 +277,10 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Top Chemicals in Product Reviews</h2>
-                <span>MongoDB mentions</span>
+                <div class="analytics-chart-topline">
+                    <h2>Top Chemicals in Product Reviews</h2>
+                    <span>MongoDB mentions</span>
+                </div>
             </div>
 
             <div class="analytics-chemical-list">
@@ -258,8 +297,10 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Rating Distribution</h2>
-                <span>{{ total_reviews_count }} reviews</span>
+                <div class="analytics-chart-topline">
+                    <h2>Rating Distribution</h2>
+                    <span>{{ total_reviews_count }} reviews</span>
+                </div>
             </div>
 
             <div class="rating-bars">
@@ -280,8 +321,10 @@
 
         <div class="dashboard-card analytics-card">
             <div class="analytics-card-header">
-                <h2>Price Statistics</h2>
-                <span>MariaDB products</span>
+                <div class="analytics-chart-topline">
+                    <h2>Price Statistics</h2>
+                    <span>MariaDB products</span>
+                </div>
             </div>
 
             <div class="price-stat-grid">

@@ -19,24 +19,24 @@
             <li><a href="/submit-review">Submit Review</a></li>
             <li><a href="/analytics">Analytics</a></li>
             {% if session.get("admin_logged_in") %}
-            <li><a href="/admin/dashboard">Admin</a></li>
+            <li class="admin-dropdown">
+                <button type="button" class="admin-dropdown-toggle">Admin</button>
+                <div class="admin-dropdown-menu" aria-label="Admin navigation">
+                    <a href="/admin/dashboard">Dashboard</a>
+                    <a href="/admin/products">Manage Products</a>
+                    <a href="/admin/products/add">Add Product</a>
+                    <a href="/admin/reviews">Manage Reviews</a>
+                    <a href="/admin/sql-demo">SQL Demo</a>
+                    <a href="/admin/trigger-demo">Trigger Demo</a>
+                    <a href="/admin/view-index-demo">View &amp; Index Demo</a>
+                    <a href="/admin/performance-demo">Performance</a>
+                    <a href="/admin/logout" class="logout-menu-item">Logout</a>
+                </div>
+            </li>
             {% else %}
             <li><a href="/admin/login">Admin</a></li>
             {% endif %}
         </ul>
-
-        {% if session.get("admin_logged_in") %}
-        <ul class="admin-nav-inline" aria-label="Admin navigation">
-            <li><a href="/admin/products">Manage Products</a></li>
-            <li><a href="/admin/products/add">Add Product</a></li>
-            <li><a href="/admin/reviews">Manage Reviews</a></li>
-            <li><a href="/admin/sql-demo">SQL Demo</a></li>
-            <li><a href="/admin/trigger-demo">Trigger Demo</a></li>
-            <li><a href="/admin/view-index-demo">View &amp; Index Demo</a></li>
-            <li><a href="/admin/performance-demo">Performance</a></li>
-            <li><a href="/admin/logout">Logout</a></li>
-        </ul>
-        {% endif %}
     </div>
 </nav>
 
@@ -45,6 +45,36 @@
 <footer>
     <p>GlowBase Database Systems Project</p>
 </footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function closeDrawer(drawer) {
+            if (!drawer) return;
+            drawer.classList.remove("is-open");
+            drawer.setAttribute("aria-hidden", "true");
+        }
+
+        document.querySelectorAll("[data-query-target]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                var drawer = document.getElementById(button.getAttribute("data-query-target"));
+                if (!drawer) return;
+                drawer.classList.add("is-open");
+                drawer.setAttribute("aria-hidden", "false");
+            });
+        });
+
+        document.querySelectorAll("[data-query-close]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                closeDrawer(button.closest(".query-drawer"));
+            });
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key !== "Escape") return;
+            document.querySelectorAll(".query-drawer.is-open").forEach(closeDrawer);
+        });
+    });
+</script>
 
 </body>
 </html>
