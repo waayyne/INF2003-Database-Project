@@ -200,9 +200,27 @@ def _bootstrap_mariadb():
             raise FileNotFoundError(f"Missing SQL file: {main_sql_file}")
         _run_sql_file(cursor, main_sql_file, database_name)
 
-    if product_categories_sql_file.exists():
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_schema = %s
+        AND table_name = 'product_categories'
+        """,
+        (database_name,)
+    )
+    has_product_categories_table = cursor.fetchone()[0] > 0
+
+    product_category_count = 0
+    if has_product_categories_table:
+        cursor.execute("SELECT COUNT(*) FROM product_categories")
+        product_category_count = cursor.fetchone()[0]
+
+    if product_categories_sql_file.exists() and product_category_count == 0:
         print(f"Running product categories population: {product_categories_sql_file}")
         _run_sql_file(cursor, product_categories_sql_file, database_name)
+    else:
+        print("Skipping product_categories population because it already has data.")
 
     if views_indexes_sql_file.exists():
         _run_sql_file(cursor, views_indexes_sql_file, database_name)

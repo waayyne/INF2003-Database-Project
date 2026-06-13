@@ -29,6 +29,7 @@ def fix_mongo_id(review):
     return review
 
 
+
 def get_brand_id(cursor, brand_name):
     cursor.execute(
         "SELECT brand_id FROM brands WHERE brand_name = %s",
@@ -56,8 +57,15 @@ def add_category_to_product(cursor, product_id, primary_category):
     if not primary_category:
         return
 
+    primary_category = primary_category.strip()
+
     cursor.execute(
-        "SELECT category_id FROM categories WHERE primary_category = %s LIMIT 1",
+        """
+        SELECT category_id
+        FROM categories
+        WHERE primary_category = %s
+        LIMIT 1
+        """,
         (primary_category,)
     )
     row = cursor.fetchone()
@@ -76,12 +84,15 @@ def add_category_to_product(cursor, product_id, primary_category):
             """,
             (primary_category, "", "")
         )
+        category_id = cursor.lastrowid
 
-        cursor.execute(
-            "SELECT category_id FROM categories WHERE primary_category = %s LIMIT 1",
-            (primary_category,)
-        )
-        category_id = cursor.fetchone()[0]
+    cursor.execute(
+        """
+        DELETE FROM product_categories
+        WHERE product_id = %s
+        """,
+        (product_id,)
+    )
 
     cursor.execute(
         """
@@ -360,8 +371,14 @@ def products():
         params.append(float(max_price))
 
     if category:
-        where_clauses.append("c.primary_category = %s")
-        params.append(category)
+        where_clauses.append("""
+            (
+                c.primary_category = %s
+                OR c.secondary_category = %s
+                OR c.tertiary_category = %s
+            )
+        """)
+        params.extend([category, category, category])
 
     if where_clauses:
         query += " WHERE " + " AND ".join(where_clauses)
@@ -380,12 +397,33 @@ def products():
 
     # Get distinct categories from categories table
     cursor.execute("""
-        SELECT DISTINCT primary_category 
-        FROM categories 
-        WHERE primary_category IS NOT NULL 
-        ORDER BY primary_category
+        SELECT DISTINCT category_name
+        FROM (
+            SELECT c.primary_category AS category_name
+            FROM products p
+            JOIN product_categories pc ON p.product_id = pc.product_id
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE c.primary_category IS NOT NULL AND c.primary_category != ''
+
+            UNION
+
+            SELECT c.secondary_category AS category_name
+            FROM products p
+            JOIN product_categories pc ON p.product_id = pc.product_id
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE c.secondary_category IS NOT NULL AND c.secondary_category != ''
+
+            UNION
+
+            SELECT c.tertiary_category AS category_name
+            FROM products p
+            JOIN product_categories pc ON p.product_id = pc.product_id
+            JOIN categories c ON pc.category_id = c.category_id
+            WHERE c.tertiary_category IS NOT NULL AND c.tertiary_category != ''
+        ) AS linked_categories
+        ORDER BY category_name
     """)
-    categories = [row["primary_category"] for row in cursor.fetchall()]
+    categories = [row["category_name"] for row in cursor.fetchall()]
 
     cursor.close()
     conn.close()
@@ -411,23 +449,8 @@ def products():
 
 
 def get_chemicals_list():
-    """Helper function to get list of chemicals from MongoDB reviews"""
     reviews_collection = get_mongo_collection()
-    
-    # First, let's check what the data structure looks like
-    # Print a sample for debugging (will appear in console)
-    sample = reviews_collection.find_one({"chemicals": {"$exists": True, "$ne": []}})
-    if sample:
-        print(f"Sample chemicals structure: {sample.get('chemicals')}")
-        print(f"Type of chemicals: {type(sample.get('chemicals'))}")
-        if sample.get('chemicals') and len(sample.get('chemicals')) > 0:
-            print(f"First item type: {type(sample.get('chemicals')[0])}")
-    
-    # The chemicals might be stored in different ways:
-    # Option 1: Direct array of strings - {"chemicals": ["Titanium dioxide"]}
-    # Option 2: Array of objects with $oid - but that's for _id only
-    
-    # Try direct unwind first
+
     pipeline = [
         {"$match": {"chemicals": {"$exists": True, "$ne": []}}},
         {"$unwind": "$chemicals"},
@@ -435,37 +458,10 @@ def get_chemicals_list():
         {"$sort": {"count": -1}},
         {"$limit": 30}
     ]
-    
+
     chemical_results = list(reviews_collection.aggregate(pipeline))
-    
-    # If no results, try extracting from nested structure
-    if not chemical_results:
-        print("No chemicals found with standard unwind, trying alternative method...")
-        # Get all reviews with chemicals
-        all_reviews = list(reviews_collection.find(
-            {"chemicals": {"$exists": True, "$ne": []}}
-        ).limit(100))
-        
-        chem_counts = {}
-        for review in all_reviews:
-            chems = review.get("chemicals", [])
-            for chem in chems:
-                # Convert to string if it's an object
-                if isinstance(chem, dict):
-                    chem_str = str(chem)  # This will show as {'$oid': '...'}
-                else:
-                    chem_str = str(chem)
-                chem_counts[chem_str] = chem_counts.get(chem_str, 0) + 1
-        
-        # Convert to list format
-        chemical_results = [{"_id": k, "count": v} for k, v in chem_counts.items()]
-        chemical_results.sort(key=lambda x: x["count"], reverse=True)
-        chemical_results = chemical_results[:30]
-    
-    result = [chem["_id"] for chem in chemical_results if chem["_id"]]
-    print(f"Found {len(result)} unique chemicals: {result[:5]}...")  # Debug print
-    
-    return result
+    return [chem["_id"] for chem in chemical_results if chem["_id"]]
+
 
 @app.route("/product/<product_id>")
 def product_detail(product_id):
@@ -1605,7 +1601,7 @@ def view_index_demo():
 def category_products(category_name):
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     cursor.execute("""
         SELECT DISTINCT
             p.product_id,
@@ -1619,14 +1615,16 @@ def category_products(category_name):
         JOIN product_categories pc ON p.product_id = pc.product_id
         JOIN categories c ON pc.category_id = c.category_id
         WHERE c.primary_category = %s
+           OR c.secondary_category = %s
+           OR c.tertiary_category = %s
         ORDER BY p.rating DESC
         LIMIT 50
-    """, (category_name,))
-    
+    """, (category_name, category_name, category_name))
+
     products = cursor.fetchall()
     cursor.close()
     conn.close()
-    
+
     return render_template("category_products.html", products=products, category=category_name)
 
 @app.route("/admin/performance-demo")
@@ -1859,4 +1857,4 @@ ORDER BY p.product_name
     )
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=False, use_reloader=False)
