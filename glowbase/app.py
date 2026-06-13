@@ -313,27 +313,12 @@ def products():
     category = request.args.get("category", "")
     rating = request.args.get("rating", "")
     price = request.args.get("price", "")
-    chemical = request.args.get("chemical", "") 
+
 
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
 
     params = []
-    no_matching_chemical_filter = False
-    
-    # If searching by chemical, first find matching product_ids from MongoDB
-    product_ids_filter = None
-    if chemical:
-        reviews_collection = get_mongo_collection()
-        # Find all reviews that contain this chemical in their chemicals array
-        matching_reviews = list(reviews_collection.find({"chemicals": chemical}))
-        # Extract unique product_ids (convert to string for consistency)
-        product_ids = list(set([str(r.get("product_id")) for r in matching_reviews if r.get("product_id")]))
-        
-        if product_ids:
-            product_ids_filter = product_ids
-        else:
-            no_matching_chemical_filter = True
 
     # Base query with categories aggregation
     query = """
@@ -356,13 +341,7 @@ def products():
 
     where_clauses = []
     
-    # Apply product ID filter from chemical search
-    if product_ids_filter:
-        placeholders = ','.join(['%s'] * len(product_ids_filter))
-        where_clauses.append(f"p.product_id IN ({placeholders})")
-        params.extend(product_ids_filter)
-    elif no_matching_chemical_filter:
-        where_clauses.append("1 = 0")
+
     
     if search:
         where_clauses.append("p.product_name LIKE %s")
@@ -449,13 +428,13 @@ def products():
         products=product_list,
         brands=brands,
         categories=categories,
-        chemicals=chemicals,
+
         search=search,
         selected_brand=brand,
         selected_category=category,
         selected_rating=rating,
         selected_price=price,
-        selected_chemical=chemical,
+
         sql_statement_used=sql_statement_used,
         
     )
@@ -913,6 +892,20 @@ def admin_add_product():
         product_id = request.form.get("product_id")
         product_name = request.form.get("product_name")
         brand_name = request.form.get("brand_name")
+        cursor.execute(
+        "SELECT product_id FROM products WHERE product_id = %s",
+        (product_id,)
+        )
+        existing_product = cursor.fetchone()
+
+        if existing_product:
+            cursor.close()
+            conn.close()
+            return render_template(
+                "admin_add_product.html",
+                error="Product ID already exists. Please use a different Product ID.",
+                form=request.form
+            )
         primary_category = request.form.get("primary_category") or ""
         price_usd = request.form.get("price_usd") or 0
         rating = request.form.get("rating") or 0

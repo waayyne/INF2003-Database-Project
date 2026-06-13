@@ -18,61 +18,110 @@
                 </div>
             </div>
 
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
             <div class="form-divider"></div>
 
             <div class="form-two-column">
                 <div class="field-group">
                     <label>Product ID</label>
-                    <input type="text" name="product_id" required placeholder="Example: P999999">
+                    <input 
+                        type="text" 
+                        name="product_id" 
+                        required 
+                        placeholder="Example: P999999"
+                        value="{{ form.product_id if form else '' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Product Name</label>
-                    <input type="text" name="product_name" required placeholder="Product name">
+                    <input 
+                        type="text" 
+                        name="product_name" 
+                        required 
+                        placeholder="Product name"
+                        value="{{ form.product_name if form else '' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Brand Name</label>
-                    <input type="text" name="brand_name" required placeholder="Brand">
+                    <input 
+                        type="text" 
+                        name="brand_name" 
+                        required 
+                        placeholder="Brand"
+                        value="{{ form.brand_name if form else '' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Primary Category</label>
-                    <input type="text" name="primary_category" required placeholder="Example: Skincare">
+                    <input 
+                        type="text" 
+                        name="primary_category" 
+                        required 
+                        placeholder="Example: Skincare"
+                        value="{{ form.primary_category if form else '' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Price USD</label>
-                    <input type="number" step="0.01" name="price_usd" required placeholder="0.00">
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        name="price_usd" 
+                        required 
+                        placeholder="0.00"
+                        value="{{ form.price_usd if form else '' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Rating</label>
-                    <input type="number" step="0.01" min="0" max="5" name="rating" value="0">
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="5" 
+                        name="rating" 
+                        value="{{ form.rating if form else '0' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Size</label>
-                    <input type="text" name="size" placeholder="Example: 50ml">
+                    <input 
+                        type="text" 
+                        name="size" 
+                        placeholder="Example: 50ml"
+                        value="{{ form.size if form else '' }}"
+                    >
                 </div>
 
                 <div class="field-group">
                     <label>Out of Stock</label>
                     <select name="out_of_stock">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
+                        <option value="0" {% if not form or form.out_of_stock == "0" %}selected{% endif %}>No</option>
+                        <option value="1" {% if form and form.out_of_stock == "1" %}selected{% endif %}>Yes</option>
                     </select>
                 </div>
             </div>
 
             <div class="field-group">
                 <label>Ingredients</label>
-                <textarea name="ingredients" rows="4" placeholder="Optional"></textarea>
+                <textarea name="ingredients" rows="4" placeholder="Optional">{{ form.ingredients if form else '' }}</textarea>
             </div>
 
             <div class="field-group">
                 <label>Highlights</label>
-                <textarea name="highlights" rows="4" placeholder="Optional"></textarea>
+                <textarea name="highlights" rows="4" placeholder="Optional">{{ form.highlights if form else '' }}</textarea>
             </div>
 
             <button type="submit" class="wide-submit">Add Product</button>

@@ -30,15 +30,6 @@
             {% endfor %}
         </select>
     
-        <!-- NEW: Chemical filter dropdown -->
-        <select name="chemical">
-            <option value="">All Chemicals</option>
-            {% for chemical in chemicals %}
-            <option value="{{ chemical }}" {% if chemical==selected_chemical %}selected{% endif %}>
-                {{ chemical }}
-            </option>
-            {% endfor %}
-        </select>
     
         <select name="rating">
             <option value="">All Ratings</option>
