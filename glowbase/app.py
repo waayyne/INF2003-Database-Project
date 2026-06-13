@@ -1792,11 +1792,16 @@ def chemicals():
 def chemical_products(chemical_name):
     reviews_collection = get_mongo_collection()
 
-    reviews = reviews_collection.find({"chemicals": chemical_name})
+    mongo_query_used = {
+        "chemicals": chemical_name
+    }
+
+    reviews = reviews_collection.find(mongo_query_used)
 
     product_ids = list(set([
-        str(r.get("product_id")) for r in reviews
-        if r.get("product_id") is not None
+        str(review.get("product_id"))
+        for review in reviews
+        if review.get("product_id") is not None
     ]))
 
     conn = get_mariadb_connection()
@@ -1805,21 +1810,40 @@ def chemical_products(chemical_name):
     if product_ids:
         placeholders = ",".join(["%s"] * len(product_ids))
 
-        cursor.execute(f"""
-            SELECT 
-                p.product_id,
-                p.product_name,
-                COALESCE(b.brand_name, 'Unknown Brand') AS brand_name,
-                p.price_usd,
-                p.rating
-            FROM products p
-            LEFT JOIN brands b ON p.brand_id = b.brand_id
-            WHERE p.product_id IN ({placeholders})
-            ORDER BY p.product_name
-        """, product_ids)
+        chemical_products_sql = f"""
+SELECT 
+    p.product_id,
+    p.product_name,
+    COALESCE(b.brand_name, 'Unknown Brand') AS brand_name,
+    p.price_usd,
+    p.rating,
+    p.loves_count,
+    p.out_of_stock
+FROM products p
+LEFT JOIN brands b ON p.brand_id = b.brand_id
+WHERE p.product_id IN ({placeholders})
+ORDER BY p.product_name
+        """
 
+        cursor.execute(chemical_products_sql, product_ids)
         products = cursor.fetchall()
+
     else:
+        chemical_products_sql = """
+SELECT 
+    p.product_id,
+    p.product_name,
+    COALESCE(b.brand_name, 'Unknown Brand') AS brand_name,
+    p.price_usd,
+    p.rating,
+    p.loves_count,
+    p.out_of_stock
+FROM products p
+LEFT JOIN brands b ON p.brand_id = b.brand_id
+WHERE p.product_id IN (...)
+ORDER BY p.product_name
+        """
+
         products = []
 
     cursor.close()
@@ -1828,7 +1852,10 @@ def chemical_products(chemical_name):
     return render_template(
         "chemical_products.html",
         chemical=chemical_name,
-        products=products
+        products=products,
+        mongo_query_used=mongo_query_used,
+        chemical_products_sql=dedent(chemical_products_sql).strip(),
+        product_ids=product_ids
     )
 
 if __name__ == "__main__":

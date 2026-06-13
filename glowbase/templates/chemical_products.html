@@ -21,7 +21,29 @@
         </div>
     </div>
 </section>
+<section class="query-display-box">
+    <h2>Nested Query Used</h2>
+    <p class="query-display-note">
+        MongoDB first finds products containing this chemical. The product IDs are then used inside the MariaDB SQL query to retrieve product details.
+    </p>
 
+    <div class="query-display-grid">
+        <div class="query-display-card">
+            <h3>Step 1: MongoDB Query</h3>
+            <pre>{{ mongo_query_used | tojson(indent=2) }}</pre>
+        </div>
+
+        <div class="query-display-card">
+            <h3>Step 2: MariaDB SQL Query</h3>
+            <pre>{{ chemical_products_sql }}</pre>
+        </div>
+
+        <div class="query-display-card">
+            <h3>Product IDs Passed Into SQL</h3>
+            <pre>{{ product_ids | tojson(indent=2) }}</pre>
+        </div>
+    </div>
+</section>
 <section class="container">
     <div class="chemical-product-count">
         <strong>{{ products|length }}</strong> products
