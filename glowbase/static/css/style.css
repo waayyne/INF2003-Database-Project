@@ -95,39 +95,6 @@ body {
     color: #050505;
 }
 
-.admin-bar {
-    background: #fffaf7;
-    border-top: 1px solid #e8e0dc;
-    border-bottom: 1px solid #e8e0dc;
-    padding: 18px 54px 14px;
-    box-shadow: 0 8px 22px rgba(33, 25, 22, 0.06);
-}
-
-.admin-bar ul {
-    display: flex;
-    list-style: none;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.admin-bar a {
-    background: #ffffff;
-    border: 1px solid #ece5e1;
-    border-radius: 999px;
-    color: #32162d;
-    text-decoration: none;
-    font-weight: bold;
-    display: inline-block;
-    padding: 8px 13px;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.admin-bar a:hover {
-    background: #32162d;
-    border-color: #32162d;
-    color: #ffffff;
-}
-
 .hero {
     min-height: 480px;
     background:
@@ -318,8 +285,7 @@ button:hover {
 
 .stats-grid,
 .feature-grid,
-.product-grid,
-.dashboard-grid {
+.product-grid {
     display: grid;
     gap: 25px;
     margin-top: 25px;
@@ -342,14 +308,9 @@ button:hover {
     gap: 16px;
 }
 
-.dashboard-grid {
-    grid-template-columns: repeat(2, 1fr);
-}
-
 .stat-card,
 .feature-card,
 .product-card,
-.detail-card,
 .review-card,
 .dashboard-card {
     background: white;
@@ -560,8 +521,7 @@ button:hover {
 }
 
 .product-card p,
-.review-card p,
-.detail-card p {
+.review-card p {
     margin: 8px 0;
     line-height: 1.5;
 }
@@ -1215,27 +1175,6 @@ button:hover {
     padding: 12px;
 }
 
-.chemical-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 18px 0;
-}
-
-.chemical-tabs span {
-    background: #f4efec;
-    color: #5d5755;
-    border-radius: 999px;
-    padding: 8px 18px;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.chemical-tabs .active {
-    background: #32162d;
-    color: #ffffff;
-}
-
 .chemical-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1664,13 +1603,6 @@ button:hover {
     font-size: 13px;
 }
 
-.sql-demo-header {
-    background:
-        radial-gradient(circle at 14% 28%, rgba(255, 214, 226, 0.35) 0 10%, transparent 11%),
-        radial-gradient(circle at 78% 22%, rgba(202, 237, 233, 0.45) 0 8%, transparent 9%),
-        #ffffff;
-}
-
 .sql-demo-container {
     margin-top: 30px;
 }
@@ -1767,13 +1699,6 @@ button:hover {
 
 .sql-demo-code pre {
     margin-top: 12px;
-}
-
-.sql-demo-query-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 18px;
-    margin-top: 18px;
 }
 
 .sql-demo-panel {
@@ -1976,18 +1901,6 @@ button:hover {
     margin-top: 28px;
 }
 
-.view-index-demo-header {
-    background:
-        radial-gradient(circle at 14% 28%, rgba(168, 220, 204, 0.42) 0 10%, transparent 11%),
-        radial-gradient(circle at 82% 22%, rgba(255, 214, 226, 0.35) 0 9%, transparent 10%),
-        linear-gradient(135deg, #ffffff 0%, #fffaf7 58%, #f5fbf8 100%);
-}
-
-.view-index-demo-container {
-    margin-top: 28px;
-}
-
-.view-index-card h3,
 .trigger-card h3 {
     color: #32162d;
     margin: 0 0 12px;
@@ -1996,36 +1909,6 @@ button:hover {
 .view-pill {
     background: #fff0ef;
     color: #ee6f66;
-}
-
-.view-index-note {
-    background:
-        radial-gradient(circle at 88% 18%, rgba(168, 220, 204, 0.26) 0 16%, transparent 17%),
-        #ffffff;
-}
-
-.view-index-note p {
-    color: #5d5755;
-    line-height: 1.6;
-    margin: 0;
-}
-
-.view-index-mini-grid {
-    display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 18px;
-}
-
-.view-index-mini-grid span {
-    background: #fbf7f5;
-    border: 1px solid #eee4df;
-    border-radius: 8px;
-    color: #32162d;
-    font-size: 12px;
-    font-weight: 900;
-    padding: 10px;
-    text-align: center;
 }
 
 .trigger-summary-grid {
@@ -2111,21 +1994,6 @@ button:hover {
     color: #9a1222;
 }
 
-.trigger-steps {
-    display: grid;
-    gap: 18px;
-    margin-top: 12px;
-    padding-left: 18px;
-    color: #3a3434;
-}
-
-.trigger-step-list {
-    margin-top: 10px;
-    padding-left: 18px;
-    color: #5d5755;
-    line-height: 1.6;
-}
-
 .trigger-test-grid {
     display: grid;
     gap: 16px;
@@ -2177,11 +2045,6 @@ button:hover {
 .system-ok {
     color: #3f9584;
     font-weight: 800;
-}
-
-.detail-card h1 {
-    color: #1b1419;
-    margin-bottom: 15px;
 }
 
 .detail-grid {
@@ -2267,7 +2130,6 @@ footer {
 @media screen and (max-width: 1000px) {
     .stats-grid,
     .feature-grid,
-    .dashboard-grid,
     .detail-grid {
         grid-template-columns: 1fr;
     }
@@ -2290,17 +2152,13 @@ footer {
     .analytics-grid,
     .form-two-column,
     .sql-split-layout,
-    .sql-demo-query-grid,
     .performance-metrics,
     .performance-query-grid,
     .performance-summary-grid,
     .trigger-summary-grid,
     .trigger-test-grid,
-    .view-index-mini-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-card-heading {
+    
+.form-card-heading {
         align-items: flex-start;
     }
 
@@ -2357,12 +2215,10 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .product-catalog-card,
-    .product-row-body {
+    .product-catalog-card {
         grid-template-columns: 1fr;
     }
 
-    .product-side,
     .product-actions-row {
         text-align: left;
     }
@@ -2596,10 +2452,6 @@ footer {
     margin-top: 18px;
     padding: 13px;
     text-align: center;
-}
-
-.small-form {
-    max-width: 420px;
 }
 
 .form-card label {
@@ -2985,11 +2837,8 @@ footer {
         grid-template-columns: 1fr;
     }
 
-    .product-detail-visual {
-        max-width: 240px;
-    }
-
-    .product-detail-sidebar {
+    
+.product-detail-sidebar {
         position: static;
     }
 }

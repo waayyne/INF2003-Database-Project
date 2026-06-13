@@ -138,17 +138,6 @@ def get_product_extra_text(cursor, product_id):
     return ingredients or "", highlights or ""
 
 
-def add_display_fields(cursor, product):
-    category = get_product_category(cursor, product["product_id"])
-    ingredients, highlights = get_product_extra_text(cursor, product["product_id"])
-
-    product["primary_category"] = category["primary_category"]
-    product["secondary_category"] = category["secondary_category"]
-    product["tertiary_category"] = category["tertiary_category"]
-    product["ingredients"] = ingredients
-    product["highlights"] = highlights
-
-    return product
 
 
 def get_product_by_id(product_id):
@@ -299,7 +288,7 @@ def products():
     category = request.args.get("category", "")
     rating = request.args.get("rating", "")
     price = request.args.get("price", "")
-    chemical = request.args.get("chemical", "")  # NEW chemical filter
+    chemical = request.args.get("chemical", "") 
 
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
