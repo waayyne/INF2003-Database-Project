@@ -24,7 +24,7 @@
 <section class="query-display-box">
     <h2>Nested Query Used</h2>
     <p class="query-display-note">
-        MongoDB first finds products containing this chemical. The product IDs are then used inside the MariaDB SQL query to retrieve product details.
+    MongoDB first finds reviews containing the selected chemical. The matching product IDs are then inserted into a MariaDB SQL query that can be copied and tested directly.
     </p>
 
     <div class="query-display-grid">
@@ -34,7 +34,7 @@
         </div>
 
         <div class="query-display-card">
-            <h3>Step 2: MariaDB SQL Query</h3>
+            <h3>Step 2: Pasteable MariaDB SQL Query</h3>
             <pre>{{ chemical_products_sql }}</pre>
         </div>
 

@@ -28,7 +28,21 @@ def fix_mongo_id(review):
         review["_id"] = str(review["_id"])
     return review
 
+def make_pasteable_sql(query, params):
+    pasteable_query = dedent(query).strip()
 
+    for param in params:
+        if param is None:
+            value = "NULL"
+        elif isinstance(param, (int, float)):
+            value = str(param)
+        else:
+            escaped = str(param).replace("\\", "\\\\").replace("'", "''")
+            value = f"'{escaped}'"
+
+        pasteable_query = pasteable_query.replace("%s", value, 1)
+
+    return pasteable_query
 
 def get_brand_id(cursor, brand_name):
     cursor.execute(
@@ -385,8 +399,7 @@ def products():
 
     query += " GROUP BY p.product_id ORDER BY p.product_name LIMIT 100"
 
-    sql_statement_used = dedent(query).strip()
-    sql_parameters_used = params[:]
+    sql_statement_used = make_pasteable_sql(query, params)
 
     cursor.execute(query, params)
     product_list = cursor.fetchall()
@@ -444,7 +457,7 @@ def products():
         selected_price=price,
         selected_chemical=chemical,
         sql_statement_used=sql_statement_used,
-        sql_parameters_used=sql_parameters_used
+        
     )
 
 
@@ -1852,7 +1865,7 @@ ORDER BY p.product_name
         chemical=chemical_name,
         products=products,
         mongo_query_used=mongo_query_used,
-        chemical_products_sql=dedent(chemical_products_sql).strip(),
+        chemical_products_sql=make_pasteable_sql(chemical_products_sql, product_ids),
         product_ids=product_ids
     )
 

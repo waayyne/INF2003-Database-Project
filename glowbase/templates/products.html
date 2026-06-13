@@ -62,19 +62,13 @@
 
     <section class="query-display-box">
         <h2>SQL Statement Used</h2>
-        <p class="query-display-note">This is the MariaDB query built from the current filters.</p>
+        <p>This is the MariaDB query built from the current filters. It can be copied and tested directly in MariaDB.</p>
 
-        <div class="query-display-grid">
-            <div class="query-display-card">
-                <h3>SQL Statement</h3>
-                <pre>{{ sql_statement_used }}</pre>
-            </div>
-
-            <div class="query-display-card">
-                <h3>Parameters</h3>
-                <pre>{{ sql_parameters_used | tojson(indent=2) }}</pre>
-            </div>
+        <div class="query-display-card">
+            <h3>Pasteable MariaDB SQL Statement</h3>
+            <pre>{{ sql_statement_used }}</pre>
         </div>
+
     </section>
 
     <p class="result-count">Showing up to 100 products</p>
