@@ -75,6 +75,15 @@
 
     </form>
 
+    <section class="query-display-box">
+        <h2>MongoDB Query Used</h2>
+        <p class="query-display-note">This is the MongoDB filter object and limit used for the current admin review search.</p>
+
+        <div class="query-display-card">
+            <pre>{{ mongo_query_used | tojson(indent=2) }}</pre>
+        </div>
+    </section>
+
     <p class="admin-result-pill">
         Showing {{ reviews|length }} review(s)
         {% if total_matching_reviews is defined %}

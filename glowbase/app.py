@@ -2,7 +2,13 @@ from flask import Flask, render_template, request, redirect, session
 from datetime import datetime
 from db import get_mariadb_connection, get_mongo_collection, bootstrap_databases
 from bson import ObjectId
+from pathlib import Path
+import matplotlib
 import re
+from textwrap import dedent
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.secret_key = "glowbase-secret-key"
@@ -214,6 +220,39 @@ def get_reviews_by_product_id(product_id):
     return [fix_mongo_id(review) for review in reviews]
 
 
+def save_bar_chart(file_path, labels, values, title, x_label, y_label, color):
+    figure, axis = plt.subplots(figsize=(10, 5))
+    figure.patch.set_facecolor("white")
+
+    if labels and values:
+        axis.bar(labels, values, color=color, edgecolor="#333333")
+        axis.tick_params(axis="x", rotation=35)
+    else:
+        axis.text(
+            0.5,
+            0.5,
+            "No data available",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+            fontsize=14,
+            color="#666666"
+        )
+        axis.set_xticks([])
+        axis.set_yticks([])
+
+    axis.set_title(title)
+    axis.set_xlabel(x_label)
+    axis.set_ylabel(y_label)
+
+    for spine in ["top", "right"]:
+        axis.spines[spine].set_visible(False)
+
+    figure.tight_layout()
+    figure.savefig(file_path, dpi=150, bbox_inches="tight")
+    plt.close(figure)
+
+
 # =========================================================
 # Public pages
 # =========================================================
@@ -266,6 +305,7 @@ def products():
     cursor = conn.cursor(dictionary=True)
 
     params = []
+    no_matching_chemical_filter = False
     
     # If searching by chemical, first find matching product_ids from MongoDB
     product_ids_filter = None
@@ -279,40 +319,7 @@ def products():
         if product_ids:
             product_ids_filter = product_ids
         else:
-            # No products with this chemical, return empty result
-            cursor.close()
-            conn.close()
-            # Get filter options still
-            conn2 = get_mariadb_connection()
-            cursor2 = conn2.cursor(dictionary=True)
-            cursor2.execute("SELECT DISTINCT brand_name FROM brands ORDER BY brand_name")
-            brands = [row["brand_name"] for row in cursor2.fetchall()]
-            cursor2.execute("""
-                SELECT DISTINCT primary_category 
-                FROM categories 
-                WHERE primary_category IS NOT NULL 
-                ORDER BY primary_category
-            """)
-            categories = [row["primary_category"] for row in cursor2.fetchall()]
-            cursor2.close()
-            conn2.close()
-            
-            # Get chemicals for filter dropdown
-            chemicals = get_chemicals_list()
-            
-            return render_template(
-                "products.html",
-                products=[],
-                brands=brands,
-                categories=categories,
-                chemicals=chemicals,
-                search=search,
-                selected_brand=brand,
-                selected_category=category,
-                selected_rating=rating,
-                selected_price=price,
-                selected_chemical=chemical
-            )
+            no_matching_chemical_filter = True
 
     # Base query with categories aggregation
     query = """
@@ -340,6 +347,8 @@ def products():
         placeholders = ','.join(['%s'] * len(product_ids_filter))
         where_clauses.append(f"p.product_id IN ({placeholders})")
         params.extend(product_ids_filter)
+    elif no_matching_chemical_filter:
+        where_clauses.append("1 = 0")
     
     if search:
         where_clauses.append("p.product_name LIKE %s")
@@ -369,6 +378,9 @@ def products():
         query += " WHERE " + " AND ".join(where_clauses)
 
     query += " GROUP BY p.product_id ORDER BY p.product_name LIMIT 100"
+
+    sql_statement_used = dedent(query).strip()
+    sql_parameters_used = params[:]
 
     cursor.execute(query, params)
     product_list = cursor.fetchall()
@@ -403,7 +415,9 @@ def products():
         selected_category=category,
         selected_rating=rating,
         selected_price=price,
-        selected_chemical=chemical
+        selected_chemical=chemical,
+        sql_statement_used=sql_statement_used,
+        sql_parameters_used=sql_parameters_used
     )
 
 
@@ -518,6 +532,11 @@ def reviews():
     if recommended != "":
         mongo_filter["is_recommended"] = int(recommended)
 
+    mongo_query_used = {
+        "filter": mongo_filter,
+        "limit": 100
+    }
+
     review_list = list(reviews_collection.find(mongo_filter).limit(100))
     review_list = [fix_mongo_id(review) for review in review_list]
 
@@ -526,7 +545,8 @@ def reviews():
         reviews=review_list,
         search=search,
         selected_rating=rating,
-        selected_recommended=recommended
+        selected_recommended=recommended,
+        mongo_query_used=mongo_query_used
     )
 
 
@@ -584,7 +604,7 @@ def submit_review():
         cursor.close()
         conn.close()
 
-        return redirect("/reviews")
+        return redirect(f"/product/{product_id}")
 
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
@@ -611,14 +631,16 @@ def analytics():
     conn = get_mariadb_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Basic product statistics
+    # Total products
     cursor.execute("SELECT COUNT(*) AS total_products FROM products")
     total_products = cursor.fetchone()["total_products"]
 
+    # Average rating
     cursor.execute("SELECT AVG(rating) AS avg_rating FROM products")
     avg_row = cursor.fetchone()
     avg_rating = round(float(avg_row["avg_rating"]), 2) if avg_row["avg_rating"] else 0
 
+    # Out of stock count
     cursor.execute("""
         SELECT COUNT(*) AS out_of_stock_count
         FROM products
@@ -629,9 +651,9 @@ def analytics():
     # Top rated products
     cursor.execute("""
         SELECT p.product_name, b.brand_name, p.rating
-        FROM products p, brands b
-        WHERE p.brand_id = b.brand_id
-        AND p.rating IS NOT NULL
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        WHERE p.rating IS NOT NULL
         ORDER BY p.rating DESC
         LIMIT 10
     """)
@@ -639,81 +661,69 @@ def analytics():
 
     # Most loved products
     cursor.execute("""
-        SELECT p.product_name, b.brand_name, p.loves_count
-        FROM products p, brands b
-        WHERE p.brand_id = b.brand_id
-        AND p.loves_count IS NOT NULL
-        ORDER BY p.loves_count DESC
+        SELECT product_name, loves_count
+        FROM products
+        WHERE loves_count IS NOT NULL
+        ORDER BY loves_count DESC
         LIMIT 10
     """)
     most_loved = cursor.fetchall()
 
     # Brand performance
     cursor.execute("""
-        SELECT b.brand_name,
-               COUNT(*) AS total_products,
-               AVG(p.rating) AS avg_rating
-        FROM products p, brands b
-        WHERE p.brand_id = b.brand_id
+        SELECT 
+            b.brand_name,
+            ROUND(AVG(p.rating), 2) AS avg_rating,
+            COUNT(*) AS total_products
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        WHERE p.rating IS NOT NULL
         GROUP BY b.brand_name
         ORDER BY avg_rating DESC
         LIMIT 10
     """)
     brand_performance = cursor.fetchall()
 
-    for brand_row in brand_performance:
-        if brand_row["avg_rating"] is not None:
-            brand_row["avg_rating"] = round(float(brand_row["avg_rating"]), 2)
+    # Price statistics
+    cursor.execute("""
+        SELECT 
+            MIN(price_usd) AS min_price,
+            MAX(price_usd) AS max_price,
+            AVG(price_usd) AS avg_price,
+            COUNT(*) AS total
+        FROM products
+        WHERE price_usd IS NOT NULL
+    """)
+    price_stats = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
-    # MongoDB statistics
     reviews_collection = get_mongo_collection()
-    recommended_count = reviews_collection.count_documents({"is_recommended": 1})
-    
-    # Chemical statistics from reviews
-    pipeline = [
-        {"$unwind": "$chemicals"},
-        {"$group": {
-            "_id": "$chemicals", 
-            "product_count": {"$sum": 1},
-            "avg_rating": {"$avg": "$rating"}
-        }},
-        {"$sort": {"product_count": -1}},
-        {"$limit": 15}
-    ]
-    
-    top_chemicals = list(reviews_collection.aggregate(pipeline))
-    
-    # Format chemical data for display
-    for chem in top_chemicals:
-        chem["avg_rating"] = round(chem["avg_rating"], 2) if chem["avg_rating"] else 0
 
-    # Rating distribution
+    recommended_count = reviews_collection.count_documents({"is_recommended": 1})
+
     rating_distribution = [
         {"stars": 5, "count": reviews_collection.count_documents({"rating": 5})},
         {"stars": 4, "count": reviews_collection.count_documents({"rating": 4})},
         {"stars": 3, "count": reviews_collection.count_documents({"rating": 3})},
         {"stars": 2, "count": reviews_collection.count_documents({"rating": 2})},
-        {"stars": 1, "count": reviews_collection.count_documents({"rating": 1})},
+        {"stars": 1, "count": reviews_collection.count_documents({"rating": 1})}
     ]
 
-    # Price distribution statistics
-    conn = get_mariadb_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("""
-        SELECT 
-            COUNT(*) as total,
-            MIN(price_usd) as min_price,
-            MAX(price_usd) as max_price,
-            AVG(price_usd) as avg_price
-        FROM products
-        WHERE price_usd IS NOT NULL AND price_usd > 0
-    """)
-    price_stats = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    # Top chemicals from MongoDB
+    top_chemicals = list(reviews_collection.aggregate([
+        {"$match": {"chemicals": {"$exists": True, "$ne": []}}},
+        {"$unwind": "$chemicals"},
+        {
+            "$group": {
+                "_id": "$chemicals",
+                "product_count": {"$sum": 1}
+            }
+        },
+        {"$sort": {"product_count": -1}},
+        {"$limit": 12}
+    ]))
 
     return render_template(
         "analytics.html",
@@ -728,8 +738,6 @@ def analytics():
         rating_distribution=rating_distribution,
         price_stats=price_stats
     )
-
-
 # =========================================================
 # Admin pages
 # =========================================================
@@ -1386,6 +1394,11 @@ def admin_reviews():
             "$options": "i"
         }
 
+    mongo_query_used = {
+        "filter": mongo_filter,
+        "limit": limit
+    }
+
     review_list = list(
         reviews_collection.find(mongo_filter).limit(limit)
     )
@@ -1407,7 +1420,8 @@ def admin_reviews():
         selected_brand=brand_name,
         selected_limit=str(limit),
         brands=brands,
-        total_matching_reviews=total_matching_reviews
+        total_matching_reviews=total_matching_reviews,
+        mongo_query_used=mongo_query_used
     )
 
 @app.route("/admin/reviews/edit/<review_id>", methods=["GET", "POST"])

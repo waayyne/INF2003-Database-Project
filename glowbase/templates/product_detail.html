@@ -187,7 +187,85 @@
                 <p>Up to 10 MongoDB reviews linked to this product.</p>
             </div>
         </div>
+        <section class="dashboard-card product-detail-card">
+        <div class="product-detail-section-heading">
+            <span class="section-kicker">Review</span>
+            <div>
+                <h2>Write a Review</h2>
+                <p>Share your experience with this product.</p>
+            </div>
+        </div>
 
+        <form method="POST" action="/submit-review" class="review-form-card">
+            <input type="hidden" name="product_id" value="{{ product.product_id }}">
+
+            <div class="form-two-column">
+                <div class="field-group">
+                    <label>Your Name</label>
+                    <input type="text" name="author_name" required placeholder="Enter your name">
+                </div>
+
+                <div class="field-group">
+                    <label>Rating</label>
+                    <select name="rating" required>
+                        <option value="">Select Rating</option>
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Good</option>
+                        <option value="3">3 - Average</option>
+                        <option value="2">2 - Poor</option>
+                        <option value="1">1 - Very Poor</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label>Recommended?</label>
+                    <select name="is_recommended" required>
+                        <option value="">Select Option</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Review Title</label>
+                <input type="text" name="review_title" required placeholder="Summarize your experience">
+            </div>
+
+            <div class="field-group">
+                <label>Review Text</label>
+                <textarea name="review_text" rows="5" required placeholder="Write your review here..."></textarea>
+            </div>
+
+            <div class="form-two-column">
+                <div class="field-group">
+                    <label>Skin Type</label>
+                    <select name="skin_type">
+                        <option value="">Prefer not to say</option>
+                        <option value="dry">Dry</option>
+                        <option value="oily">Oily</option>
+                        <option value="combination">Combination</option>
+                        <option value="normal">Normal</option>
+                        <option value="sensitive">Sensitive</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label>Skin Tone</label>
+                    <select name="skin_tone">
+                        <option value="">Prefer not to say</option>
+                        <option value="fair">Fair</option>
+                        <option value="light">Light</option>
+                        <option value="medium">Medium</option>
+                        <option value="tan">Tan</option>
+                        <option value="deep">Deep</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="wide-submit">Submit Review</button>
+        </form>
+    </section>
         <div class="review-list reviews-grid">
             {% for review in reviews %}
             <div class="review-card">

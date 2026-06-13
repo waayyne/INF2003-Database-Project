@@ -981,6 +981,51 @@ button:hover {
     color: #666;
 }
 
+.query-display-box {
+    background: #ffffff;
+    border: 1px solid #ece5e1;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(33, 25, 22, 0.06);
+    margin-bottom: 18px;
+    padding: 18px;
+}
+
+.query-display-box h2 {
+    color: #32162d;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.query-display-note {
+    color: #5d5755;
+    margin-bottom: 14px;
+}
+
+.query-display-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.query-display-card {
+    background: #fbf7f5;
+    border: 1px solid #eee4df;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.query-display-card h3 {
+    color: #32162d;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.query-display-card pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .review-list {
     display: grid;
     gap: 20px;

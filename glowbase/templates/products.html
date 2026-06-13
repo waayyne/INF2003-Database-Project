@@ -60,6 +60,23 @@
         <a href="/products" class="secondary-link">Reset</a>
     </form>
 
+    <section class="query-display-box">
+        <h2>SQL Statement Used</h2>
+        <p class="query-display-note">This is the MariaDB query built from the current filters.</p>
+
+        <div class="query-display-grid">
+            <div class="query-display-card">
+                <h3>SQL Statement</h3>
+                <pre>{{ sql_statement_used }}</pre>
+            </div>
+
+            <div class="query-display-card">
+                <h3>Parameters</h3>
+                <pre>{{ sql_parameters_used | tojson(indent=2) }}</pre>
+            </div>
+        </div>
+    </section>
+
     <p class="result-count">Showing up to 100 products</p>
 
     <div class="product-grid product-list-grid">

@@ -30,6 +30,15 @@
         <a href="/reviews" class="secondary-link">Reset</a>
     </form>
 
+    <section class="query-display-box">
+        <h2>MongoDB Query Used</h2>
+        <p class="query-display-note">This is the MongoDB filter object used for the current review search.</p>
+
+        <div class="query-display-card">
+            <pre>{{ mongo_query_used | tojson(indent=2) }}</pre>
+        </div>
+    </section>
+
     <p class="result-count">Showing up to 100 reviews</p>
 
     <div class="review-list reviews-grid">
