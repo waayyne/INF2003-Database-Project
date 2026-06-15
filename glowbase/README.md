@@ -141,13 +141,13 @@ glowbase/
 ### 5.2 Install Python packages
 
 ```bash
-pip install flask mysql-connector-python pymongo python-dotenv
+pip install flask mysql-connector-python pymongo python-dotenv matplotlib
 ```
 
 Or using the requirements file:
 
 ```bash
-pip install -r requirements.txt
+py -m pip install -r requirements.txt
 ```
 
 ### 5.3 Configure environment variables
