@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="page-header products-page-header">
+    <h1>{{ category }}</h1>
+    <p>Products assigned to this category.</p>
+</section>
+
+<section class="container">
+    <a href="/products" class="secondary-link">&larr; Back to all products</a>
+
+    <p class="result-count">Showing up to 50 products</p>
+
+    <div class="product-grid product-list-grid">
+        {% for product in products %}
+        <div class="product-card product-catalog-card">
+            <div class="product-visual">
+                <span>{{ product.brand_name[:1]|upper }}</span>
+                <small>{{ product.brand_name }}</small>
+            </div>
+
+            <div class="product-catalog-body">
+                <h3>{{ product.product_name }}</h3>
+                <p class="product-line"><strong>Brand:</strong> {{ product.brand_name }}</p>
+
+                <div class="product-divider"></div>
+
+                <div class="product-price-row">
+                    <p class="price">${{ product.price_usd }}</p>
+                    <p class="product-rating">Rating {{ product.rating }} / 5</p>
+                </div>
+
+                <div class="product-actions-row">
+                    {% if product.out_of_stock == 1 %}
+                    <span class="badge danger">Out of Stock</span>
+                    {% else %}
+                    <span class="badge">In Stock</span>
+                    {% endif %}
+
+                    <a href="/product/{{ product.product_id }}" class="btn product-view-btn">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p>No products found in this category.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

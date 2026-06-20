@@ -40,7 +40,7 @@ def admin_reviews():
             {"review_text": {"$regex": search, "$options": "i"}}
         ]
 
-    if rating:
+    if rating in {"1", "2", "3", "4", "5"}:
         mongo_filter["rating"] = int(rating)
 
     if recommended == "1":
@@ -95,6 +95,9 @@ def admin_edit_review(review_id):
     if not is_admin_logged_in():
         return redirect("/admin/login")
 
+    if not ObjectId.is_valid(review_id):
+        return "Review not found.", 404
+
     reviews_collection = get_mongo_collection()
 
     if request.method == "POST":
@@ -120,7 +123,7 @@ def admin_edit_review(review_id):
     review = reviews_collection.find_one({"_id": ObjectId(review_id)})
 
     if not review:
-        return "Review not found."
+        return "Review not found.", 404
 
     review = fix_mongo_id(review)
 
@@ -134,6 +137,9 @@ def admin_edit_review(review_id):
 def admin_delete_review(review_id):
     if not is_admin_logged_in():
         return redirect("/admin/login")
+
+    if not ObjectId.is_valid(review_id):
+        return "Review not found.", 404
 
     reviews_collection = get_mongo_collection()
     reviews_collection.delete_one({"_id": ObjectId(review_id)})

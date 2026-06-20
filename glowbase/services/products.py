@@ -1,5 +1,5 @@
 from db import get_mariadb_connection
-from utils import make_pasteable_sql
+from utils import make_pasteable_sql, parse_number_range
 
 
 def get_brand_id(cursor, brand_name):
@@ -267,17 +267,17 @@ def build_product_filter_query(filters, order_by="p.product_name", limit=100, ad
         """)
         params.extend([filters["category"], filters["category"], filters["category"]])
 
-    if filters.get("rating"):
-        min_rating, max_rating = filters["rating"].split("-")
+    rating_range = parse_number_range(filters.get("rating"))
+    if rating_range:
+        min_rating, max_rating = rating_range
         where_clauses.append("p.rating >= %s AND p.rating <= %s")
-        params.append(float(min_rating))
-        params.append(float(max_rating))
+        params.extend([min_rating, max_rating])
 
-    if filters.get("price"):
-        min_price, max_price = filters["price"].split("-")
+    price_range = parse_number_range(filters.get("price"))
+    if price_range:
+        min_price, max_price = price_range
         where_clauses.append("p.price_usd >= %s AND p.price_usd <= %s")
-        params.append(float(min_price))
-        params.append(float(max_price))
+        params.extend([min_price, max_price])
 
     if where_clauses:
         query += " WHERE " + " AND ".join(where_clauses)

@@ -17,6 +17,24 @@ def fix_mongo_id(review):
     return review
 
 
+def parse_number_range(value):
+    """Return a validated numeric range, or None for an invalid filter value."""
+    if not value:
+        return None
+
+    try:
+        minimum, maximum = value.split("-", 1)
+        minimum = float(minimum)
+        maximum = float(maximum)
+    except (TypeError, ValueError):
+        return None
+
+    if minimum > maximum:
+        return None
+
+    return minimum, maximum
+
+
 def make_pasteable_sql(query, params):
     pasteable_query = dedent(query).strip()
 

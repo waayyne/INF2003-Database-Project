@@ -8,7 +8,7 @@ from services.products import (
     get_product_select_options,
     increment_product_review_count,
 )
-from utils import fix_mongo_id
+from utils import fix_mongo_id, parse_number_range
 
 review_bp = Blueprint("reviews", __name__)
 
@@ -30,14 +30,15 @@ def reviews():
             {"review_text": {"$regex": search, "$options": "i"}}
         ]
 
-    if rating:
-        min_rating, max_rating = rating.split("-")
+    rating_range = parse_number_range(rating)
+    if rating_range:
+        min_rating, max_rating = rating_range
         mongo_filter["rating"] = {
-            "$gte": float(min_rating),
-            "$lte": float(max_rating)
+            "$gte": min_rating,
+            "$lte": max_rating
         }
 
-    if recommended != "":
+    if recommended in {"0", "1"}:
         mongo_filter["is_recommended"] = int(recommended)
 
     mongo_query_used = {

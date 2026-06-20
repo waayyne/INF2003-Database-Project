@@ -218,7 +218,6 @@ def admin_edit_product(product_id):
                 )
             )
 
-            conn.commit()
             update_product_text_table(cursor, "product_ingredients", "ingredients", product_id)
             update_product_text_table(cursor, "product_highlights", "highlights", product_id)
             conn.commit()
@@ -326,7 +325,7 @@ def admin_delete_product(product_id):
 
 def update_product_text_table(cursor, table_name, column_name, product_id):
     text_value = request.form.get(column_name)
-    if not text_value:
+    if text_value is None:
         return
 
     cursor.execute(

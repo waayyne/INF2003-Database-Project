@@ -54,7 +54,7 @@ def product_detail(product_id):
     product = get_product_by_id(product_id)
 
     if not product:
-        return "Product not found."
+        return "Product not found.", 404
 
     product["chemicals"] = get_product_chemicals(product_id)
     reviews = get_reviews_by_product_id(product_id)

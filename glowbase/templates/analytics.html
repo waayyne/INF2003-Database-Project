@@ -285,7 +285,7 @@
 
             <div class="analytics-chemical-list">
                 {% for chem in top_chemicals[:12] %}
-                <a href="/products?chemical={{ chem._id|urlencode }}" class="analytics-chemical-row">
+                <a href="/chemicals/{{ chem._id|urlencode }}" class="analytics-chemical-row">
                     <span>{{ chem._id }}</span>
                     <strong>{{ chem.product_count }}</strong>
                 </a>
