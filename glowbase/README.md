@@ -102,8 +102,8 @@ glowbase/
 │   └── import_glowbase.sh                  # macOS/Linux manual import script
 │
 ├── static/
-│   ├── css/style.css
-│   └── js/app.js
+│   ├── css/                                  # Page stylesheets
+│   └── images/                               # Background images
 │
 └── templates/
     ├── base.html

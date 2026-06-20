@@ -33,3 +33,4 @@ data/*.csv
 # Logs / runtime artifacts
 *.log
 *.pid
+static/charts/*.png

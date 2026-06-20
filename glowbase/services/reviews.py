@@ -14,21 +14,6 @@ def get_reviews_by_product_id(product_id):
     return [fix_mongo_id(review) for review in reviews]
 
 
-def get_chemicals_list(limit=30):
-    reviews_collection = get_mongo_collection()
-
-    pipeline = [
-        {"$match": {"chemicals": {"$exists": True, "$ne": []}}},
-        {"$unwind": "$chemicals"},
-        {"$group": {"_id": "$chemicals", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$limit": limit}
-    ]
-
-    chemical_results = list(reviews_collection.aggregate(pipeline))
-    return [chem["_id"] for chem in chemical_results if chem["_id"]]
-
-
 def get_product_chemicals(product_id):
     reviews_collection = get_mongo_collection()
     pipeline = [

@@ -75,33 +75,6 @@ def add_category_to_product(cursor, product_id, primary_category):
     )
 
 
-def get_product_category(cursor, product_id):
-    cursor.execute(
-        """
-        SELECT c.primary_category, c.secondary_category, c.tertiary_category
-        FROM product_categories pc, categories c
-        WHERE pc.category_id = c.category_id
-        AND pc.product_id = %s
-        LIMIT 1
-        """,
-        (product_id,)
-    )
-    row = cursor.fetchone()
-
-    if row:
-        return {
-            "primary_category": row["primary_category"] or "",
-            "secondary_category": row["secondary_category"] or "",
-            "tertiary_category": row["tertiary_category"] or ""
-        }
-
-    return {
-        "primary_category": "",
-        "secondary_category": "",
-        "tertiary_category": ""
-    }
-
-
 def get_product_extra_text(cursor, product_id):
     cursor.execute(
         "SELECT ingredients FROM product_ingredients WHERE product_id = %s",
