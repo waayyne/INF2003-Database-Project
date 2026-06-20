@@ -1,0 +1,546 @@
+.filter-box {
+    background: white;
+    padding: 22px;
+    border: 1px solid #ece5e1;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 18px;
+}
+
+.filter-box input,
+.filter-box select {
+    padding: 12px;
+    border: 1px solid #d9d1cc;
+    border-radius: 8px;
+    min-width: 180px;
+}
+
+.result-count {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.query-display-box {
+    background: #ffffff;
+    border: 1px solid #ece5e1;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(33, 25, 22, 0.06);
+    margin-bottom: 18px;
+    padding: 18px;
+}
+
+.query-display-box h2 {
+    color: #32162d;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.query-display-note {
+    color: #5d5755;
+    margin-bottom: 14px;
+}
+
+.query-display-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.query-display-card {
+    background: #fbf7f5;
+    border: 1px solid #eee4df;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.query-display-card h3 {
+    color: #32162d;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.query-display-card pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.query-drawer-button {
+    background: #f0e2ff;
+    border: 1px solid #dfc4f1;
+    box-shadow: none;
+    color: #6f238c;
+}
+
+.query-drawer-button:hover {
+    background: #32162d;
+    border-color: #32162d;
+    color: #ffffff;
+}
+
+.analytics-query-button {
+    font-size: 12px;
+    padding: 8px 12px;
+}
+
+.query-drawer {
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    transition: opacity 0.22s ease;
+    z-index: 1000;
+}
+
+.query-drawer.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.query-drawer-backdrop {
+    background: rgba(31, 23, 29, 0.38);
+    inset: 0;
+    position: absolute;
+}
+
+.query-drawer-panel {
+    background: #fffaf7;
+    border-left: 1px solid #ece5e1;
+    box-shadow: -18px 0 44px rgba(33, 25, 22, 0.18);
+    height: 100%;
+    margin-left: auto;
+    max-width: min(560px, 92vw);
+    overflow-y: auto;
+    padding: 26px;
+    position: relative;
+    transform: translateX(100%);
+    transition: transform 0.24s ease;
+    width: 560px;
+}
+
+.query-drawer.is-open .query-drawer-panel {
+    transform: translateX(0);
+}
+
+.query-drawer-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.query-drawer-header h2 {
+    color: #32162d;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 32px;
+    line-height: 1.1;
+    margin: 0 0 8px;
+}
+
+.query-drawer-header p {
+    color: #5d5755;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.query-drawer-close {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #ece5e1;
+    border-radius: 8px;
+    box-shadow: none;
+    color: #32162d;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 26px;
+    height: 42px;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    width: 42px;
+}
+
+.query-drawer-close:hover {
+    background: #32162d;
+    color: #ffffff;
+}
+
+.query-drawer-panel .query-display-card {
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+.query-drawer-panel .query-display-card pre {
+    max-height: 68vh;
+    overflow: auto;
+}
+
+.review-list {
+    display: grid;
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.reviews-grid .review-card {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 18px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.review-person {
+    border-right: 1px solid #eee4df;
+    padding: 22px 14px;
+    text-align: center;
+    background: linear-gradient(180deg, #fff9f8 0%, #fbf4f1 100%);
+}
+
+.review-avatar {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #c6a5e5, #9e78cf);
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.review-person p {
+    margin: 0 0 5px;
+    color: #32162d;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.review-person span {
+    color: #756b67;
+    font-size: 12px;
+}
+
+.review-content {
+    padding: 20px 20px 18px 0;
+    min-width: 0;
+}
+
+.review-topline {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+}
+
+.review-card h3 {
+    color: #1b1419;
+    margin-bottom: 5px;
+    font-size: 17px;
+    line-height: 1.25;
+}
+
+.review-meta {
+    font-size: 14px;
+    color: #6f238c;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.review-rating {
+    white-space: nowrap;
+    color: #d7d0cc;
+    font-size: 18px;
+    text-align: right;
+}
+
+.review-rating .filled {
+    color: #ff6b5f;
+}
+
+.review-rating strong {
+    color: #1b1419;
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 13px;
+}
+
+.review-text {
+    color: #343030;
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 8px 0 14px;
+}
+
+.review-profile-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    color: #3a3434;
+    font-size: 12px;
+}
+
+.profile-pill {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #f2e7ff;
+    color: #6f238c;
+    font-style: normal;
+    font-weight: 800;
+}
+
+.profile-pill.yes {
+    background: #e9f7f1;
+    color: #13745f;
+}
+
+.profile-pill.no {
+    background: #fff1f1;
+    color: #9a1222;
+}
+
+.review-footer-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: end;
+    margin-top: 15px;
+}
+
+.review-helpfulness {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    color: #5d5755;
+    font-size: 12px;
+}
+
+.review-helpfulness span:first-child {
+    color: #13745f;
+}
+
+.review-helpfulness span:nth-child(2) {
+    color: #d95e73;
+}
+
+.review-helpfulness strong {
+    border: 1px solid #aadfce;
+    background: #f0fbf7;
+    color: #13745f;
+    border-radius: 8px;
+    padding: 7px 10px;
+}
+
+.review-chemicals {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.chemical-toolbar {
+    background: white;
+    border: 1px solid #ece5e1;
+    border-radius: 8px;
+    box-shadow: 0 10px 26px rgba(33, 25, 22, 0.07);
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px;
+}
+
+.chemical-toolbar input,
+.chemical-toolbar select {
+    border: 1px solid #d9d1cc;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.chemical-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.chemical-card {
+    background: #ffffff;
+    border: 1px solid #ece5e1;
+    border-radius: 8px;
+    box-shadow: 0 10px 26px rgba(33, 25, 22, 0.07);
+    padding: 22px;
+    text-align: center;
+}
+
+.chemical-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #dff5f0;
+    color: #3f9584;
+}
+
+.chemical-card:nth-child(2n) .chemical-icon {
+    background: #f0e2ff;
+    color: #7a2fa4;
+}
+
+.chemical-card:nth-child(3n) .chemical-icon {
+    background: #f8ecd2;
+    color: #9a7130;
+}
+
+.chemical-card:nth-child(4n) .chemical-icon {
+    background: #ffe4df;
+    color: #a43d4d;
+}
+
+.chemical-icon svg {
+    width: 36px;
+    height: 36px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chemical-card h3 {
+    color: #3f9584;
+    font-size: 20px;
+    line-height: 1.18;
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+}
+
+.chemical-card:nth-child(2n) h3 {
+    color: #7a2fa4;
+}
+
+.chemical-card:nth-child(3n) h3 {
+    color: #9a7130;
+}
+
+.chemical-card:nth-child(4n) h3 {
+    color: #a43d4d;
+}
+
+.chemical-desc {
+    min-height: 52px;
+    color: #5d5755;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.chemical-count {
+    border-top: 1px solid #eee4df;
+    color: #5d5755;
+    margin: 14px 0;
+    padding-top: 14px;
+}
+
+.chemical-count strong {
+    color: #3f9584;
+}
+
+.chemical-note {
+    background: #f4eaf2;
+    border-radius: 8px;
+    color: #6b5d66;
+    font-size: 13px;
+    margin-top: 18px;
+    padding: 12px 16px;
+}
+
+.chemical-product-count {
+    background: #eef9f5;
+    border: 1px solid #d2efe5;
+    border-radius: 8px;
+    color: #3f776b;
+    display: inline-block;
+    font-weight: 800;
+    margin-bottom: 18px;
+    padding: 12px 18px;
+}
+
+.chemical-product-list {
+    display: grid;
+    gap: 14px;
+}
+
+.chemical-product-card {
+    background: #ffffff;
+    border: 1px solid #ece5e1;
+    border-radius: 8px;
+    box-shadow: 0 10px 26px rgba(33, 25, 22, 0.07);
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 14px;
+}
+
+.chemical-product-visual {
+    width: 80px;
+    height: 96px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg, #fff0f2, #e8f6f3);
+    color: #32162d;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 34px;
+    font-weight: 800;
+}
+
+.chemical-product-info h3 {
+    color: #1b1430;
+    margin-bottom: 5px;
+}
+
+.chemical-product-info p {
+    color: #5d5755;
+    font-size: 13px;
+    margin: 4px 0;
+}
+
+.rating-stars {
+    color: #d7d0cc;
+    letter-spacing: 1px;
+}
+
+.rating-stars .filled {
+    color: #d99024;
+}
+
+.chemical-product-side {
+    text-align: right;
+}
+
+.chemical-product-side .price {
+    color: #3f9584;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 14px;
+}
+
+.green-note {
+    background: #dff5f0;
+    color: #3f776b;
+}
+

@@ -1,0 +1,152 @@
+@media screen and (max-width: 1000px) {
+    .stats-grid,
+    .feature-grid,
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chemical-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chemical-toolbar,
+    .chemical-product-card,
+    .analytics-kpi-grid,
+    .analytics-grid,
+    .form-two-column,
+    .sql-split-layout,
+    .performance-metrics,
+    .performance-query-grid,
+    .performance-summary-grid,
+    .trigger-summary-grid,
+    .trigger-test-grid,
+    
+.form-card-heading {
+        align-items: flex-start;
+    }
+
+    .review-form-card,
+    .admin-login-card {
+        padding: 26px;
+    }
+
+    .analytics-chemical-list,
+    .price-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .nav-link-groups {
+        justify-content: center;
+    }
+
+    .navbar ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .admin-dropdown-menu {
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, -6px);
+    }
+
+    .admin-dropdown:hover .admin-dropdown-menu,
+    .admin-dropdown:focus-within .admin-dropdown-menu {
+        transform: translate(-50%, 0);
+    }
+
+    .hero {
+        min-height: 430px;
+        padding: 45px 28px;
+        background:
+            linear-gradient(90deg, rgba(255, 250, 247, 0.96) 0%, rgba(255, 250, 247, 0.9) 64%, rgba(255, 250, 247, 0.35) 100%),
+            url("../images/hero-cosmetics-bg.png") center right / cover no-repeat;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .home-overview {
+        margin-top: 28px;
+    }
+
+    .stat-card {
+        grid-template-columns: 1fr;
+    }
+
+    .product-catalog-card {
+        grid-template-columns: 1fr;
+    }
+
+    .product-actions-row {
+        text-align: left;
+    }
+
+    .product-visual {
+        min-height: 140px;
+    }
+
+    .reviews-grid .review-card {
+        grid-template-columns: 1fr;
+    }
+
+    .review-person {
+        border-right: none;
+        border-bottom: 1px solid #eee4df;
+    }
+
+    .review-content {
+        padding: 20px;
+    }
+
+    .review-topline,
+    .review-footer-row {
+        grid-template-columns: 1fr;
+    }
+
+    .review-rating,
+    .review-chemicals,
+    .chemical-product-side {
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    .filter-box {
+        flex-direction: column;
+    }
+
+    .filter-box input,
+    .filter-box select,
+    .filter-box button,
+    .secondary-link {
+        width: 100%;
+    }
+
+    .sql-demo-sidebar {
+        position: static;
+    }
+
+    .sql-split-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sql-demo-nav {
+        grid-template-columns: 1fr;
+    }
+}
+

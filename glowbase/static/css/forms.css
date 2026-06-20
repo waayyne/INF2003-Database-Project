@@ -1,0 +1,217 @@
+.form-card {
+    background: white;
+    padding: 28px;
+    border: 1px solid #ece5e1;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: grid;
+    gap: 12px;
+    max-width: 750px;
+}
+
+.form-page {
+    background:
+        radial-gradient(circle at 3% 78%, rgba(255, 214, 226, 0.45) 0 13%, transparent 14%),
+        radial-gradient(circle at 88% 15%, rgba(232, 210, 250, 0.5) 0 11%, transparent 12%),
+        linear-gradient(135deg, #fffaf7 0%, #fbf3f2 50%, #fff7fb 100%);
+    min-height: calc(100vh - 78px);
+    padding: 54px 0;
+}
+
+.form-page-container {
+    margin-top: 0;
+}
+
+.review-form-card {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 36px;
+}
+
+.form-card-heading {
+    align-items: center;
+    display: flex;
+    gap: 18px;
+}
+
+.form-heading-icon,
+.admin-lock-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #ffe8f0;
+    color: #32162d;
+}
+
+.form-heading-icon svg,
+.admin-lock-icon svg {
+    width: 34px;
+    height: 34px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.form-card-heading h1,
+.admin-login-heading h1 {
+    color: #32162d;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 38px;
+    line-height: 1.12;
+    margin: 0 0 6px;
+}
+
+.form-card-heading p,
+.admin-login-heading p {
+    color: #5d5755;
+    margin: 0;
+}
+
+.form-divider {
+    border-top: 1px solid #eee4df;
+    margin: 24px 0 20px;
+}
+
+.form-two-column {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.field-group {
+    display: grid;
+    gap: 8px;
+}
+
+.field-group label {
+    color: #1b1419;
+    font-weight: 800;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+    background: #ffffff;
+    border: 1px solid #d9d1cc;
+    border-radius: 8px;
+    color: #262222;
+    font-family: Arial, sans-serif;
+    padding: 13px 14px;
+}
+
+.field-group textarea {
+    resize: vertical;
+}
+
+.wide-submit {
+    width: 100%;
+    margin-top: 18px;
+    padding: 15px 22px;
+}
+
+.form-footnote {
+    color: #5d8b7f;
+    font-size: 13px;
+    margin-top: 18px;
+    text-align: center;
+}
+
+.admin-login-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0;
+}
+
+.admin-login-card {
+    max-width: 430px;
+    padding: 34px;
+    position: relative;
+    text-align: left;
+}
+
+.admin-login-card::before,
+.admin-login-card::after {
+    content: "";
+    position: absolute;
+    width: 92px;
+    height: 150px;
+    opacity: 0.28;
+    pointer-events: none;
+}
+
+.admin-login-card::before {
+    left: -26px;
+    top: 48px;
+    background: radial-gradient(ellipse at center, #ffd7d4 0 12%, transparent 13%);
+}
+
+.admin-login-card::after {
+    right: -26px;
+    bottom: 26px;
+    background: radial-gradient(ellipse at center, #e8f6f3 0 12%, transparent 13%);
+}
+
+.admin-lock-icon {
+    background: #f0e2ff;
+    color: #6f238c;
+    margin: 0 auto 18px;
+}
+
+.admin-login-heading {
+    text-align: center;
+}
+
+.admin-submit {
+    background: #32162d;
+    box-shadow: 0 10px 22px rgba(50, 22, 45, 0.2);
+}
+
+.admin-submit:hover {
+    background: #4a2443;
+}
+
+.admin-hint {
+    background: #f4eaf9;
+    border: 1px solid #eadcf4;
+    border-radius: 8px;
+    color: #6f238c;
+    margin-top: 18px;
+    padding: 13px;
+    text-align: center;
+}
+
+.form-card label {
+    font-weight: bold;
+    color: #1b1419;
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+    padding: 12px;
+    border: 1px solid #d9d1cc;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+}
+
+.form-card textarea {
+    resize: vertical;
+}
+
+.error-message {
+    background: #ffe0e0;
+    color: #b00020;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.hint {
+    color: #666;
+    font-size: 14px;
+}
+

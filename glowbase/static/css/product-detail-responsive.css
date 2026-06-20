@@ -1,0 +1,12 @@
+@media screen and (max-width: 1000px) {
+    .product-detail-hero,
+    .product-detail-grid,
+    .product-detail-stats,
+    .product-detail-data-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-detail-sidebar {
+        position: static;
+    }
+}
