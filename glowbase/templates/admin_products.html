@@ -162,11 +162,12 @@
                             Edit
                         </a>
 
-                        <a href="/admin/products/delete/{{ product.product_id }}"
-                           class="delete-link"
-                           onclick="return confirm('Are you sure you want to delete {{ product.product_name }}?');">
-                            Delete
-                        </a>
+                        <form method="POST"
+                              action="/admin/products/delete/{{ product.product_id }}"
+                              class="delete-form"
+                              onsubmit="return confirm('Are you sure you want to delete {{ product.product_name }}?');">
+                            <button type="submit" class="delete-link">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 {% else %}

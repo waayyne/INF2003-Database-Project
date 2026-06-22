@@ -284,6 +284,10 @@
     flex-wrap: wrap;
 }
 
+.delete-form {
+    margin: 0;
+}
+
 .admin-result-pill {
     background: #ffffff;
     border: 1px solid #ece5e1;
@@ -312,6 +316,8 @@
     background: #fff1f1;
     border: 1px solid #f2c8ce;
     color: #9a1222;
+    cursor: pointer;
+    font: inherit;
     padding: 8px 12px;
     border-radius: 8px;
     text-decoration: none;

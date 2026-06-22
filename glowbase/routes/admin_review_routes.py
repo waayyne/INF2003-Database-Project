@@ -133,7 +133,7 @@ def admin_edit_review(review_id):
     )
 
 
-@admin_review_bp.route("/admin/reviews/delete/<review_id>")
+@admin_review_bp.route("/admin/reviews/delete/<review_id>", methods=["POST"])
 def admin_delete_review(review_id):
     if not is_admin_logged_in():
         return redirect("/admin/login")

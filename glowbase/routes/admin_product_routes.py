@@ -303,7 +303,7 @@ def admin_edit_product(product_id):
         return f"Error loading product: {str(e)}", 500
 
 
-@admin_product_bp.route("/admin/products/delete/<product_id>")
+@admin_product_bp.route("/admin/products/delete/<product_id>", methods=["POST"])
 def admin_delete_product(product_id):
     if not is_admin_logged_in():
         return redirect("/admin/login")
