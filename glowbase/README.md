@@ -165,7 +165,7 @@ MONGO_DATABASE=glowbase
 MONGO_REVIEWS_COLLECTION=reviews
 ```
 
-Do not push `.env` to GitHub.
+
 
 ### 5.4 Database setup — automatic
 
