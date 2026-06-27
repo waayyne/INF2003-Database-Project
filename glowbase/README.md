@@ -165,6 +165,10 @@ MONGO_DATABASE=glowbase
 MONGO_REVIEWS_COLLECTION=reviews
 ```
 
+If MariaDB connection fails, update `MARIADB_USER` and `MARIADB_PASSWORD` in `.env` to match your local MariaDB setup.
+
+Default demo admin login: `admin / admin123`
+
 
 
 ### 5.4 Database setup — automatic
